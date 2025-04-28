@@ -119,17 +119,10 @@ class CourseDetailScreen extends StatelessWidget {
                           subtitle: Text(lesson['duration']),
                           trailing: const Icon(Icons.play_circle_outline),
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(lesson['title']),
-                                content: Text(lesson['description']),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Закрыть'),
-                                  ),
-                                ],
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LessonDetailScreen(lesson: lesson),
                               ),
                             );
                           },
@@ -140,6 +133,71 @@ class CourseDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LessonDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> lesson;
+
+  const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final content = lesson['content'] as List<dynamic>? ?? [];
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(lesson['title'] ?? 'Урок'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            Text(
+              lesson['description'] ?? '',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            ...content.map((item) {
+              if (item['type'] == 'text') {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(item['data']),
+                );
+              }
+              if (item['type'] == 'image') {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Image.network(item['data']),
+                );
+              }
+              if (item['type'] == 'code') {
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.all(8),
+                  color: Colors.grey[200],
+                  child: Text(item['data'], style: const TextStyle(fontFamily: 'monospace')),
+                );
+              }
+              if (item['type'] == 'quiz') {
+                final quiz = item['data'];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Вопрос: ${quiz['question']}'),
+                    ...List.generate((quiz['options'] as List).length, (i) {
+                      return Text('- ${quiz['options'][i]}');
+                    }),
+                    const SizedBox(height: 8),
+                    Text('Ответ: ${quiz['answer']}', style: const TextStyle(color: Colors.green)),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            }).toList(),
           ],
         ),
       ),
