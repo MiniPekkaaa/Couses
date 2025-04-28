@@ -108,34 +108,3 @@ class StaticData {
     }
   ];
 }
-
-Future<void> testAdd() async {
-  await categories.loadCollection();
-  StaticData.categories.forEach((category) {
-    final newDocId = category['id'] as String;
-    if (!categories.docs.any((element) => element.id == newDocId)) {
-      categories.docs.add(categories.newDoc(id: newDocId, source: category));
-    }
-  });
-  await categories.saveCollection();
-
-  await courses.loadCollection();
-  StaticData.courses.forEach((course) {
-    final newDocId = course['id'] as String;
-    if (!courses.docs.any((element) => element.id == newDocId)) {
-      courses.docs.add(courses.newDoc(
-          id: newDocId, source: course['data'] as Map<String, dynamic>));
-    }
-  });
-  await courses.saveCollection();
-
-  await lessons.loadCollection();
-  staticLessons.forEach((lesson) {
-    final newDocId = lesson['id'] as String;
-    if (!lessons.docs.any((element) => element.id == newDocId)) {
-      lessons.docs.add(lessons.newDoc(
-          id: newDocId, source: lesson['data'] as Map<String, dynamic>));
-    }
-  });
-  await lessons.saveCollection();
-}
