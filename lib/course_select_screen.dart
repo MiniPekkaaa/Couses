@@ -4,13 +4,11 @@ class CourseSelectScreen extends StatelessWidget {
   final String title;
   final List<Map<String, dynamic>> itemsCollection;
   final String categoryField;
-  final IconData? icon;
 
   CourseSelectScreen({
     required this.title,
     required this.itemsCollection,
     required this.categoryField,
-    this.icon,
   });
 
   @override
@@ -19,40 +17,9 @@ class CourseSelectScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                'https://i.ibb.co/dDP1ZGx/file-cover-2.png',
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Text(
-                    'Популярные курсы',
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: itemsCollection.length,
-              itemBuilder: (context, index) => _buildCourseCard(context, itemsCollection[index]),
-            ),
-          ],
-        ),
+      body: ListView.builder(
+        itemCount: itemsCollection.length,
+        itemBuilder: (context, index) => _buildCourseCard(context, itemsCollection[index]),
       ),
     );
   }
@@ -60,9 +27,17 @@ class CourseSelectScreen extends StatelessWidget {
   Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
+      child: ListTile(
+        leading: Image.network(
+          course['image'] ?? 'https://via.placeholder.com/50',
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+        ),
+        title: Text(course['title'] ?? 'Untitled'),
+        subtitle: Text(course['instructor'] ?? 'Unknown Instructor'),
+        trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
-          // Навигация к деталям курса
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -70,60 +45,6 @@ class CourseSelectScreen extends StatelessWidget {
             ),
           );
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.network(
-              course['image'] ?? 'https://via.placeholder.com/150',
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    course['title'] ?? 'Untitled',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    course['description'] ?? 'No description',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        course['duration'] ?? 'Duration not specified',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        course['price'] ?? 'Price not specified',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -198,7 +119,19 @@ class CourseDetailScreen extends StatelessWidget {
                           subtitle: Text(lesson['duration']),
                           trailing: const Icon(Icons.play_circle_outline),
                           onTap: () {
-                            // Навигация к уроку
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text(lesson['title']),
+                                content: Text(lesson['description']),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Закрыть'),
+                                  ),
+                                ],
+                              ),
+                            );
                           },
                         ),
                       );
