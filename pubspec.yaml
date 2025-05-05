@@ -12,7 +12,6 @@ dependencies:
   redis: ^3.0.0
   http: ^1.1.0
   shared_preferences: ^2.2.0
-  telegram_bot_api: ^1.0.0
   flutter_markdown: ^0.6.18
   youtube_player_flutter: ^8.1.2
 
