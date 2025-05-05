@@ -107,26 +107,38 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: (course['lessons'] as List).length,
-                    itemBuilder: (context, index) {
-                      final lesson = course['lessons'][index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(lesson['title']),
-                          subtitle: Text(lesson['duration']),
-                          trailing: const Icon(Icons.play_circle_outline),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LessonDetailScreen(lesson: lesson),
-                              ),
-                            );
-                          },
-                        ),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: NocoDBService.fetchLessons(course['Id'] ?? course['id']),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final lessons = snapshot.data!;
+                      if (lessons.isEmpty) {
+                        return const Text('Нет уроков');
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: lessons.length,
+                        itemBuilder: (context, index) {
+                          final lesson = lessons[index];
+                          return Card(
+                            child: ListTile(
+                              title: Text(lesson['title'] ?? ''),
+                              subtitle: Text(lesson['duration'] ?? ''),
+                              trailing: const Icon(Icons.play_circle_outline),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LessonDetailScreen(lesson: lesson),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -147,7 +159,7 @@ class LessonDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = lesson['content'] as List<dynamic>? ?? [];
+    final content = lesson['content'] ?? '';
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson['title'] ?? 'Урок'),
@@ -161,43 +173,8 @@ class LessonDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            ...content.map((item) {
-              if (item['type'] == 'text') {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(item['data']),
-                );
-              }
-              if (item['type'] == 'image') {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Image.network(item['data']),
-                );
-              }
-              if (item['type'] == 'code') {
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.grey[200],
-                  child: Text(item['data'], style: const TextStyle(fontFamily: 'monospace')),
-                );
-              }
-              if (item['type'] == 'quiz') {
-                final quiz = item['data'];
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Вопрос: ${quiz['question']}'),
-                    ...List.generate((quiz['options'] as List).length, (i) {
-                      return Text('- ${quiz['options'][i]}');
-                    }),
-                    const SizedBox(height: 8),
-                    Text('Ответ: ${quiz['answer']}', style: const TextStyle(color: Colors.green)),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            }).toList(),
+            // Показываем rich text (Markdown)
+            SelectableText(content),
           ],
         ),
       ),

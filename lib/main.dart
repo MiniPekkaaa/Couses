@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'static_data.dart';
 import 'course_select_screen.dart';
+import 'nocodb_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,10 +14,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: CourseSelectScreen(
-        title: 'Курсы',
-        itemsCollection: StaticData.courses,
-        categoryField: 'categoryId',
+      home: FutureBuilder<List<Map<String, dynamic>>>(
+        future: NocoDBService.fetchCourses(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return CourseSelectScreen(
+            title: 'Курсы',
+            itemsCollection: snapshot.data!,
+            categoryField: 'categoryId',
+          );
+        },
       ),
     );
   }
