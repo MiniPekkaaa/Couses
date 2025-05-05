@@ -28,14 +28,20 @@ class AirtableService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchLessons(String courseRecordId) async {
-    final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable?filterByFormula=%7BfldGy90lQ9sfZQsEA%7D%3D%22$courseRecordId%22';
+    final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable?filterByFormula={Course}="$courseRecordId"';
     final response = await http.get(
       Uri.parse(url),
       headers: {'Authorization': 'Bearer $apiKey'},
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(data['records'].map((r) => r['fields']));
+      return List<Map<String, dynamic>>.from(
+        data['records'].map((r) {
+          final map = Map<String, dynamic>.from(r['fields']);
+          map['id'] = r['id'];
+          return map;
+        })
+      );
     } else {
       throw Exception('Ошибка загрузки уроков: ${response.body}');
     }
