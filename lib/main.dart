@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: FutureBuilder<List<Map<String, dynamic>>>(
-        future: NocoDBService.fetchCourses(),
+        future: AirtableService.fetchCourses(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
           return CourseSelectScreen(

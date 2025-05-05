@@ -31,13 +31,15 @@ class CourseSelectScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Image.network(
-          course['image'] ?? 'https://via.placeholder.com/50',
+          course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
+              ? course['Image'][0]['url']
+              : 'https://via.placeholder.com/50',
           width: 50,
           height: 50,
           fit: BoxFit.cover,
         ),
-        title: Text(course['title'] ?? 'Untitled'),
-        subtitle: Text(course['instructor'] ?? 'Unknown Instructor'),
+        title: Text(course['Name'] ?? 'Untitled'),
+        subtitle: Text(course['Instructor'] ?? 'Unknown Instructor'),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.push(
@@ -61,14 +63,16 @@ class CourseDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(course['title'] ?? 'Course Details'),
+        title: Text(course['Name'] ?? 'Course Details'),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              course['image'] ?? 'https://via.placeholder.com/150',
+              course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
+                  ? course['Image'][0]['url']
+                  : 'https://via.placeholder.com/150',
               height: 250,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -79,7 +83,7 @@ class CourseDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    course['title'] ?? 'Untitled',
+                    course['Name'] ?? 'Untitled',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 24,
@@ -87,7 +91,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Инструктор: ${course['instructor'] ?? 'Unknown'}',
+                    'Инструктор: ${course['Instructor'] ?? 'Unknown'}',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
@@ -95,7 +99,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    course['description'] ?? 'No description',
+                    course['Description'] ?? 'No description',
                     style: const TextStyle(
                       fontSize: 16,
                     ),
@@ -110,7 +114,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<List<Map<String, dynamic>>>(
-                    future: NocoDBService.fetchLessons(course['Id'] ?? course['id']),
+                    future: AirtableService.fetchLessons(course['id'] ?? course['Id']),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
@@ -127,8 +131,8 @@ class CourseDetailScreen extends StatelessWidget {
                           final lesson = lessons[index];
                           return Card(
                             child: ListTile(
-                              title: Text(lesson['title'] ?? ''),
-                              subtitle: Text(lesson['duration'] ?? ''),
+                              title: Text(lesson['Name'] ?? ''),
+                              subtitle: Text(lesson['Duration'] ?? ''),
                               trailing: const Icon(Icons.play_circle_outline),
                               onTap: () {
                                 Navigator.push(
@@ -161,17 +165,17 @@ class LessonDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = lesson['content'] ?? '';
+    final content = lesson['Content'] ?? '';
     return Scaffold(
       appBar: AppBar(
-        title: Text(lesson['title'] ?? 'Урок'),
+        title: Text(lesson['Name'] ?? 'Урок'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
             Text(
-              lesson['description'] ?? '',
+              lesson['Description'] ?? '',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
