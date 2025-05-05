@@ -15,7 +15,13 @@ class AirtableService {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(data['records'].map((r) => r['fields']));
+      return List<Map<String, dynamic>>.from(
+        data['records'].map((r) {
+          final map = Map<String, dynamic>.from(r['fields']);
+          map['id'] = r['id']; // добавляем recordId курса
+          return map;
+        })
+      );
     } else {
       throw Exception('Ошибка загрузки курсов: ${response.body}');
     }
