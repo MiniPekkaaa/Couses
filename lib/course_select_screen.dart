@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'nocodb_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 
 class CourseSelectScreen extends StatelessWidget {
@@ -171,7 +174,7 @@ class LessonDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = lesson['Content'] ?? '';
+    final content = (lesson['Content'] ?? '').replaceAll(r'\\n', '\n').replaceAll(r'\n', '\n');
     final videoUrl = lesson['Video URL'] ?? '';
     final videoId = YoutubePlayer.convertUrlToId(videoUrl);
     return Scaffold(
@@ -187,7 +190,17 @@ class LessonDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            if (videoId != null)
+            MarkdownBody(
+              data: content,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                p: const TextStyle(fontSize: 15),
+                h1: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                h2: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                h3: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (videoId != null && !kIsWeb && (Platform.isAndroid || Platform.isIOS))
               YoutubePlayer(
                 controller: YoutubePlayerController(
                   initialVideoId: videoId,
@@ -197,9 +210,18 @@ class LessonDetailScreen extends StatelessWidget {
                   ),
                 ),
                 showVideoProgressIndicator: true,
+              )
+            else if (videoUrl.isNotEmpty)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.play_circle_fill),
+                label: const Text('Смотреть видео'),
+                onPressed: () async {
+                  final uri = Uri.parse(videoUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
               ),
-            if (videoId != null) const SizedBox(height: 16),
-            MarkdownBody(data: content),
           ],
         ),
       ),
