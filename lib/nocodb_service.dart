@@ -28,7 +28,7 @@ class AirtableService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchLessons(String courseRecordId) async {
-    final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable?filterByFormula={Course}="$courseRecordId"';
+    final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable?filterByFormula=FIND("$courseRecordId",ARRAYJOIN({Course},","))>0';
     final response = await http.get(
       Uri.parse(url),
       headers: {'Authorization': 'Bearer $apiKey'},
