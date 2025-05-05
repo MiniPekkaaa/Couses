@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'nocodb_service.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
 class CourseSelectScreen extends StatelessWidget {
@@ -170,6 +172,8 @@ class LessonDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = lesson['Content'] ?? '';
+    final videoUrl = lesson['Video URL'] ?? '';
+    final videoId = YoutubePlayer.convertUrlToId(videoUrl);
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson['Name'] ?? 'Урок'),
@@ -183,8 +187,19 @@ class LessonDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            // Показываем rich text (Markdown)
-            SelectableText(content),
+            if (videoId != null)
+              YoutubePlayer(
+                controller: YoutubePlayerController(
+                  initialVideoId: videoId,
+                  flags: const YoutubePlayerFlags(
+                    autoPlay: false,
+                    mute: false,
+                  ),
+                ),
+                showVideoProgressIndicator: true,
+              ),
+            if (videoId != null) const SizedBox(height: 16),
+            MarkdownBody(data: content),
           ],
         ),
       ),
