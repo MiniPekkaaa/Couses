@@ -114,12 +114,16 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<List<Map<String, dynamic>>>(
-                    future: AirtableService.fetchLessons(course['id'] ?? course['Id']),
+                    future: AirtableService.fetchLessons(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final lessons = snapshot.data!;
+                      final lessons = snapshot.data!
+                          .where((lesson) =>
+                              lesson['Course'] != null &&
+                              (lesson['Course'] as List).contains(course['id']))
+                          .toList();
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
