@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
+import 'package:selectable_markdown/selectable_markdown.dart';
 
 
 class CourseSelectScreen extends StatelessWidget {
@@ -103,7 +104,7 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  MarkdownBody(
+                  SelectableMarkdown(
                     data: course['Description'] ?? 'No description',
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
@@ -114,7 +115,7 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                     onTapLink: (text, href, title) {
                       if (href != null) {
-                        launchUrl(Uri.parse(href));
+                        launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
                       }
                     },
                   ),
@@ -200,7 +201,7 @@ class LessonDetailScreen extends StatelessWidget {
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: MarkdownBody(
+                child: SelectableMarkdown(
                   data: lesson['Description'] ?? '',
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
@@ -211,13 +212,13 @@ class LessonDetailScreen extends StatelessWidget {
                   ),
                   onTapLink: (text, href, title) {
                     if (href != null) {
-                      launchUrl(Uri.parse(href));
+                      launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
                     }
                   },
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            MarkdownBody(
+            SelectableMarkdown(
               data: lesson['Content'] ?? '',
               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                 a: const TextStyle(color: Colors.blue),
@@ -228,7 +229,7 @@ class LessonDetailScreen extends StatelessWidget {
               ),
               onTapLink: (text, href, title) {
                 if (href != null) {
-                  launchUrl(Uri.parse(href));
+                  launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
                 }
               },
             ),
