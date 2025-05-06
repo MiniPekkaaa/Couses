@@ -117,7 +117,6 @@ class CourseDetailScreen extends StatelessWidget {
                         fontStyle: FontStyle.italic,
                       ),
                       listBullet: const TextStyle(fontSize: 16),
-                      listNumber: const TextStyle(fontSize: 16),
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
                         backgroundColor: Color(0xFFF5F5F5),
@@ -230,7 +229,6 @@ class LessonDetailScreen extends StatelessWidget {
                         fontStyle: FontStyle.italic,
                       ),
                       listBullet: const TextStyle(fontSize: 16),
-                      listNumber: const TextStyle(fontSize: 16),
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
                         backgroundColor: Color(0xFFF5F5F5),
@@ -268,7 +266,6 @@ class LessonDetailScreen extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                 ),
                 listBullet: const TextStyle(fontSize: 16),
-                listNumber: const TextStyle(fontSize: 16),
                 a: const TextStyle(color: Colors.blue),
                 code: const TextStyle(
                   backgroundColor: Color(0xFFF5F5F5),
