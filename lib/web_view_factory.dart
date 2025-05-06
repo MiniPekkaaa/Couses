@@ -1,5 +1,6 @@
-import 'package:universal_html/html.dart' as html;
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:ui' as ui;
+import 'package:universal_html/html.dart' as html;
 
 void registerKinescopeViewFactory(String viewType, String url) {
   // ignore: undefined_prefixed_name
