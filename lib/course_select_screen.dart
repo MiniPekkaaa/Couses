@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'dart:ui' as ui;
 import 'dart:html' as html;
+import 'web_view_registry.dart';
 
 class KinescopePlayerWidget extends StatelessWidget {
   final String videoUrl;
@@ -16,19 +17,15 @@ class KinescopePlayerWidget extends StatelessWidget {
 
   KinescopePlayerWidget({required this.videoUrl, required this.id}) {
     if (kIsWeb) {
-      // ignore: undefined_prefixed_name
-      ui.platformViewRegistry.registerViewFactory(
-        'kinescope-player-$id',
-        (int viewId) {
-          final iframe = html.IFrameElement()
-            ..src = videoUrl
-            ..style.border = 'none'
-            ..allowFullscreen = true
-            ..width = '100%'
-            ..height = '315';
-          return iframe;
-        },
-      );
+      registerWebViewFactory('kinescope-player-$id', (int viewId) {
+        final iframe = html.IFrameElement()
+          ..src = videoUrl
+          ..style.border = 'none'
+          ..allowFullscreen = true
+          ..width = '100%'
+          ..height = '315';
+        return iframe;
+      });
     }
   }
 
