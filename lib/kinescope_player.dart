@@ -1,4 +1,5 @@
 import 'dart:html' as html;
+import 'dart:js' as js;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,7 +31,7 @@ class _KinescopePlayerState extends State<KinescopePlayer> {
     } else {
       // Для веб используем JavaScript SDK
       final containerId = 'kinescope-player-${widget.videoId}';
-      html.window.js.context.callMethod('registerKinescopePlayer', [widget.videoId, containerId]);
+      js.context.callMethod('registerKinescopePlayer', [widget.videoId, containerId]);
     }
   }
 
