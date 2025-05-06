@@ -9,11 +9,24 @@ import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 
 class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
+  static final _imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+
+  bool _isImageUrl(String url) {
+    final lower = url.toLowerCase();
+    return _imageExtensions.any((ext) => lower.endsWith(ext));
+  }
+
   @override
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final String? text = element.textContent;
     final String? href = element.attributes['href'];
     if (href == null) return const SizedBox();
+    if (_isImageUrl(href)) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+      );
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
