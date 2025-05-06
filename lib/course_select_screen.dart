@@ -11,39 +11,34 @@ import 'dart:ui' as ui;
 import 'dart:html' as html;
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:iframe_view/iframe_view.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class KinescopePlayerWidget extends StatefulWidget {
-  final String videoUrl;
-  const KinescopePlayerWidget({required this.videoUrl, super.key});
-
-  @override
-  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
-}
-
-class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
-  late final player = Player();
-  late final videoController = VideoController(player);
-
-  @override
-  void initState() {
-    super.initState();
-    player.open(Media(widget.videoUrl));
-  }
-
-  @override
-  void dispose() {
-    player.dispose();
-    super.dispose();
-  }
+class KinescopePlayerWidget extends StatelessWidget {
+  final String videoId;
+  const KinescopePlayerWidget({required this.videoId, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Video(
-        controller: videoController,
-      ),
-    );
+    final url = 'https://kinescope.io/embed/$videoId';
+    if (kIsWeb) {
+      return SizedBox(
+        height: 315,
+        child: IFrameView(
+          src: url,
+          id: 'kinescope-player-$videoId',
+          allow: 'autoplay; fullscreen',
+        ),
+      );
+    } else {
+      return SizedBox(
+        height: 315,
+        child: WebView(
+          initialUrl: url,
+          javascriptMode: JavascriptMode.unrestricted,
+        ),
+      );
+    }
   }
 }
 
@@ -76,10 +71,10 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       );
     }
     if (_isKinescopeUrl(href)) {
-      final url = _normalizeKinescopeUrl(href);
+      final videoId = _normalizeKinescopeUrl(href);
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: KinescopePlayerWidget(videoUrl: url),
+        child: KinescopePlayerWidget(videoId: videoId),
       );
     }
     return Row(
