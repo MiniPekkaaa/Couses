@@ -6,11 +6,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 
-// Для web платформы
-import 'web_view_registry.dart';
-
-// Для мобильных платформ
-import 'package:webview_flutter/webview_flutter.dart';
+// Платформо-зависимые импорты
+import 'web_view.dart';
+import 'mobile_view.dart';
 
 class KinescopePlayerWidget extends StatelessWidget {
   final String videoId;
@@ -21,22 +19,12 @@ class KinescopePlayerWidget extends StatelessWidget {
     final url = 'https://kinescope.io/embed/$videoId';
     
     if (kIsWeb) {
-      final viewType = 'kinescope-player-$videoId';
-      // Регистрируем viewType только для web
-      registerWebViewFactory(viewType, (int viewId) => createKinescopeIframe(url));
-      
-      return SizedBox(
-        height: 315,
-        child: HtmlElementView(viewType: viewType),
+      return WebKinescopePlayer(
+        url: url,
+        viewType: 'kinescope-player-$videoId',
       );
     } else {
-      return SizedBox(
-        height: 315,
-        child: WebView(
-          initialUrl: url,
-          javascriptMode: JavascriptMode.unrestricted,
-        ),
-      );
+      return MobileKinescopePlayer(url: url);
     }
   }
 }
