@@ -7,6 +7,37 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'dart:ui' as ui;
+import 'dart:html' as html;
+
+class KinescopePlayerWidget extends StatelessWidget {
+  final String videoUrl;
+  final String id;
+
+  KinescopePlayerWidget({required this.videoUrl, required this.id}) {
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(
+      'kinescope-player-$id',
+      (int viewId) {
+        final iframe = html.IFrameElement()
+          ..src = videoUrl
+          ..style.border = 'none'
+          ..allowFullscreen = true
+          ..width = '100%'
+          ..height = '315';
+        return iframe;
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 315,
+      child: HtmlElementView(viewType: 'kinescope-player-$id'),
+    );
+  }
+}
 
 class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
   static final _imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
@@ -14,6 +45,15 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
   bool _isImageUrl(String url) {
     final lower = url.toLowerCase();
     return _imageExtensions.any((ext) => lower.endsWith(ext));
+  }
+
+  bool _isKinescopeUrl(String url) {
+    return url.contains('kinescope.io');
+  }
+
+  String _normalizeKinescopeUrl(String url) {
+    // Убираем @ в начале, если есть
+    return url.startsWith('@') ? url.substring(1) : url;
   }
 
   @override
@@ -25,6 +65,14 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+      );
+    }
+    if (_isKinescopeUrl(href)) {
+      final url = _normalizeKinescopeUrl(href);
+      final id = url.split('/').last;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: KinescopePlayerWidget(videoUrl: url, id: id),
       );
     }
     return Row(
