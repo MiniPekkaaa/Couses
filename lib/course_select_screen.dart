@@ -103,9 +103,8 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Markdown(
+                  MarkdownBody(
                     data: course['Description'] ?? 'No description',
-                    selectable: true,
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -201,9 +200,8 @@ class LessonDetailScreen extends StatelessWidget {
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Markdown(
+                child: MarkdownBody(
                   data: lesson['Description'] ?? '',
-                  selectable: true,
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
@@ -219,9 +217,8 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            Markdown(
+            MarkdownBody(
               data: lesson['Content'] ?? '',
-              selectable: true,
               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                 a: const TextStyle(color: Colors.blue),
                 code: const TextStyle(
