@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'package:flutter_markdown_selectable_text/flutter_markdown_selectable_text.dart';
 
 
 class CourseSelectScreen extends StatelessWidget {
