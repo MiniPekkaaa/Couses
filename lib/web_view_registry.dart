@@ -1,10 +1,2 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:ui' as ui;
-
-export 'web_view_registry_stub.dart'
-    if (dart.library.html) 'web_view_registry_web.dart';
-
-void registerWebViewFactory(String viewType, dynamic Function(int) cb) {
-  // ignore: undefined_prefixed_name
-  ui.platformViewRegistry.registerViewFactory(viewType, cb);
-} 
+   export 'web_view_registry_stub.dart'
+       if (dart.library.html) 'web_view_registry_web.dart';
