@@ -15,27 +15,33 @@ class KinescopePlayerWidget extends StatelessWidget {
   final String id;
 
   KinescopePlayerWidget({required this.videoUrl, required this.id}) {
-    // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(
-      'kinescope-player-$id',
-      (int viewId) {
-        final iframe = html.IFrameElement()
-          ..src = videoUrl
-          ..style.border = 'none'
-          ..allowFullscreen = true
-          ..width = '100%'
-          ..height = '315';
-        return iframe;
-      },
-    );
+    if (kIsWeb) {
+      // ignore: undefined_prefixed_name
+      ui.platformViewRegistry.registerViewFactory(
+        'kinescope-player-$id',
+        (int viewId) {
+          final iframe = html.IFrameElement()
+            ..src = videoUrl
+            ..style.border = 'none'
+            ..allowFullscreen = true
+            ..width = '100%'
+            ..height = '315';
+          return iframe;
+        },
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 315,
-      child: HtmlElementView(viewType: 'kinescope-player-$id'),
-    );
+    if (kIsWeb) {
+      return SizedBox(
+        height: 315,
+        child: HtmlElementView(viewType: 'kinescope-player-$id'),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
 
