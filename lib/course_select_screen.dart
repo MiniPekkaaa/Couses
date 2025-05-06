@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'nocodb_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
@@ -21,8 +20,10 @@ class KinescopePlayerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = 'https://kinescope.io/embed/$videoId';
+    
     if (kIsWeb) {
       final viewType = 'kinescope-player-$videoId';
+      // Регистрируем viewType только для web
       // ignore: undefined_prefixed_name
       ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
         final iframe = html.IFrameElement()
@@ -33,6 +34,7 @@ class KinescopePlayerWidget extends StatelessWidget {
           ..height = '315';
         return iframe;
       });
+      
       return SizedBox(
         height: 315,
         child: HtmlElementView(viewType: viewType),
