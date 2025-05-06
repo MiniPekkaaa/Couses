@@ -42,7 +42,6 @@ class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
       aspectRatio: 16 / 9,
       child: Video(
         controller: videoController,
-        controls: VideoControls.adaptive,
       ),
     );
   }
