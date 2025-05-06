@@ -7,8 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 
 // Для web платформы
-import 'dart:ui' as ui;
-import 'package:universal_html/html.dart' as html;
+import 'web_view_registry.dart';
 
 // Для мобильных платформ
 import 'package:webview_flutter/webview_flutter.dart';
@@ -24,16 +23,7 @@ class KinescopePlayerWidget extends StatelessWidget {
     if (kIsWeb) {
       final viewType = 'kinescope-player-$videoId';
       // Регистрируем viewType только для web
-      // ignore: undefined_prefixed_name
-      ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
-        final iframe = html.IFrameElement()
-          ..src = url
-          ..style.border = 'none'
-          ..allowFullscreen = true
-          ..width = '100%'
-          ..height = '315';
-        return iframe;
-      });
+      registerWebViewFactory(viewType, (int viewId) => createKinescopeIframe(url));
       
       return SizedBox(
         height: 315,
