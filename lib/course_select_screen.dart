@@ -6,6 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
+import 'package:markdown/markdown.dart' as md;
 
 class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
   @override
