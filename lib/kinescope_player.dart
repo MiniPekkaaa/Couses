@@ -30,7 +30,7 @@ class _KinescopePlayerState extends State<KinescopePlayer> {
     } else {
       // Для веб используем JavaScript SDK
       final containerId = 'kinescope-player-${widget.videoId}';
-      html.window.callMethod('registerKinescopePlayer', [widget.videoId, containerId]);
+      html.window.js.context.callMethod('registerKinescopePlayer', [widget.videoId, containerId]);
     }
   }
 
