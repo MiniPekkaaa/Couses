@@ -103,8 +103,9 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  MarkdownBody(
+                  Markdown(
                     data: course['Description'] ?? 'No description',
+                    selectable: true,
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -193,45 +194,34 @@ class LessonDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (lesson['Description'] != null && lesson['Description'].isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Описание',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Markdown(
+                  data: lesson['Description'] ?? '',
+                  selectable: true,
+                  styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                    a: const TextStyle(color: Colors.blue),
+                    code: const TextStyle(
+                      backgroundColor: Color(0xFFF5F5F5),
+                      fontFamily: 'monospace',
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  MarkdownBody(
-                    data: lesson['Description'] ?? '',
-                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                      a: const TextStyle(color: Colors.blue),
-                      code: const TextStyle(
-                        backgroundColor: Color(0xFFF5F5F5),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                    onTapLink: (text, href, title) {
-                      if (href != null) {
-                        launchUrl(Uri.parse(href));
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                  onTapLink: (text, href, title) {
+                    if (href != null) {
+                      launchUrl(Uri.parse(href));
+                    }
+                  },
+                ),
               ),
-            const Text(
-              'Содержание',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            MarkdownBody(
+            const Divider(height: 32, thickness: 1),
+            Markdown(
               data: lesson['Content'] ?? '',
+              selectable: true,
               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                 a: const TextStyle(color: Colors.blue),
                 code: const TextStyle(
