@@ -72,10 +72,33 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
     if (_isKinescopeUrl(href)) {
       final url = _normalizeKinescopeUrl(href);
       final id = url.split('/').last;
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: KinescopePlayerWidget(videoUrl: url, id: id),
-      );
+      if (kIsWeb) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: KinescopePlayerWidget(videoUrl: url, id: id),
+        );
+      } else {
+        // На других платформах просто ссылка
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () => launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication),
+              child: Text(
+                text ?? href,
+                style: preferredStyle?.copyWith(color: Colors.blue, decoration: TextDecoration.underline),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.copy, size: 16),
+              tooltip: 'Копировать адрес ссылки',
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: href));
+              },
+            ),
+          ],
+        );
+      }
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
