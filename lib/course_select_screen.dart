@@ -2,30 +2,48 @@ import 'package:flutter/material.dart';
 import 'nocodb_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'dart:ui' as ui;
+import 'dart:html' as html;
+import 'package:media_kit_video/media_kit_video.dart';
+import 'package:media_kit/media_kit.dart';
 
-// Платформо-зависимые импорты
-import 'web_view.dart';
-import 'mobile_view.dart';
+class KinescopePlayerWidget extends StatefulWidget {
+  final String videoUrl;
+  const KinescopePlayerWidget({required this.videoUrl, super.key});
 
-class KinescopePlayerWidget extends StatelessWidget {
-  final String videoId;
-  const KinescopePlayerWidget({required this.videoId, super.key});
+  @override
+  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
+}
+
+class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
+  late final player = Player();
+  late final videoController = VideoController(player);
+
+  @override
+  void initState() {
+    super.initState();
+    player.open(Media(widget.videoUrl));
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final url = 'https://kinescope.io/embed/$videoId';
-    
-    if (kIsWeb) {
-      return WebKinescopePlayer(
-        url: url,
-        viewType: 'kinescope-player-$videoId',
-      );
-    } else {
-      return MobileKinescopePlayer(url: url);
-    }
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Video(
+        controller: videoController,
+      ),
+    );
   }
 }
 
@@ -58,10 +76,10 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       );
     }
     if (_isKinescopeUrl(href)) {
-      final videoId = _normalizeKinescopeUrl(href);
+      final url = _normalizeKinescopeUrl(href);
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: KinescopePlayerWidget(videoId: videoId),
+        child: KinescopePlayerWidget(videoUrl: url),
       );
     }
     return Row(
