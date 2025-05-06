@@ -3,14 +3,14 @@ import 'nocodb_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
+
+// Для web платформы
 import 'dart:ui' as ui;
-import 'dart:html' as html;
-import 'package:media_kit_video/media_kit_video.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:iframe_view/iframe_view.dart';
+import 'package:universal_html/html.dart' as html;
+
+// Для мобильных платформ
 import 'package:webview_flutter/webview_flutter.dart';
 
 class KinescopePlayerWidget extends StatelessWidget {

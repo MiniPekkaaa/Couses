@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:html' as html;
+import 'package:universal_html/html.dart' as html;
 
 void main() {
   runApp(const MyApp());
@@ -48,6 +48,8 @@ class MyApp extends StatelessWidget {
                       onPressed: () {
                         // Перезагружаем страницу
                         if (kIsWeb) {
+                          // Используем window.location.reload() напрямую
+                          // ignore: undefined_prefixed_name
                           html.window.location.reload();
                         }
                       },
