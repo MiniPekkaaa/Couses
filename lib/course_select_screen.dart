@@ -12,15 +12,15 @@ import 'dart:html' as html;
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit/media_kit.dart';
 
-class KinescopePlayerWidget extends StatefulWidget {
+class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
-  const KinescopePlayerWidget({required this.videoUrl, super.key});
+  const VideoPlayerWidget({required this.videoUrl, super.key});
 
   @override
-  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
+  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
-class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
 
@@ -49,19 +49,16 @@ class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
 
 class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
   static final _imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+  static final _videoExtensions = ['.mp4', '.webm', '.mov', '.mkv', '.avi'];
 
   bool _isImageUrl(String url) {
     final lower = url.toLowerCase();
     return _imageExtensions.any((ext) => lower.endsWith(ext));
   }
 
-  bool _isKinescopeUrl(String url) {
-    return url.contains('kinescope.io');
-  }
-
-  String _normalizeKinescopeUrl(String url) {
-    // Убираем @ в начале, если есть
-    return url.startsWith('@') ? url.substring(1) : url;
+  bool _isDirectVideoUrl(String url) {
+    final lower = url.toLowerCase();
+    return (url.contains('archive.org') && _videoExtensions.any((ext) => lower.endsWith(ext)));
   }
 
   @override
@@ -75,11 +72,10 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
         child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
       );
     }
-    if (_isKinescopeUrl(href)) {
-      final url = _normalizeKinescopeUrl(href);
+    if (_isDirectVideoUrl(href)) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: KinescopePlayerWidget(videoUrl: url),
+        child: VideoPlayerWidget(videoUrl: href),
       );
     }
     return Row(
