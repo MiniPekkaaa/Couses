@@ -105,18 +105,7 @@ class CourseDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   MarkdownBody(
                     data: course['Description'] ?? 'No description',
-                    styleSheet: MarkdownStyleSheet(
-                      p: const TextStyle(fontSize: 16),
-                      h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      h3: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      strong: const TextStyle(fontWeight: FontWeight.bold),
-                      em: const TextStyle(fontStyle: FontStyle.italic),
-                      blockquote: const TextStyle(
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      listBullet: const TextStyle(fontSize: 16),
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
                         backgroundColor: Color(0xFFF5F5F5),
@@ -216,19 +205,8 @@ class LessonDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   MarkdownBody(
-                    data: lesson['Description'],
-                    styleSheet: MarkdownStyleSheet(
-                      p: const TextStyle(fontSize: 16),
-                      h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      h3: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      strong: const TextStyle(fontWeight: FontWeight.bold),
-                      em: const TextStyle(fontStyle: FontStyle.italic),
-                      blockquote: const TextStyle(
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      listBullet: const TextStyle(fontSize: 16),
+                    data: lesson['Description'] ?? '',
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
                         backgroundColor: Color(0xFFF5F5F5),
@@ -254,18 +232,7 @@ class LessonDetailScreen extends StatelessWidget {
             const SizedBox(height: 8),
             MarkdownBody(
               data: lesson['Content'] ?? '',
-              styleSheet: MarkdownStyleSheet(
-                p: const TextStyle(fontSize: 16),
-                h1: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                h3: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                strong: const TextStyle(fontWeight: FontWeight.bold),
-                em: const TextStyle(fontStyle: FontStyle.italic),
-                blockquote: const TextStyle(
-                  color: Colors.grey,
-                  fontStyle: FontStyle.italic,
-                ),
-                listBullet: const TextStyle(fontSize: 16),
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                 a: const TextStyle(color: Colors.blue),
                 code: const TextStyle(
                   backgroundColor: Color(0xFFF5F5F5),
