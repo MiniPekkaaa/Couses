@@ -9,9 +9,10 @@ class MobileKinescopePlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 315,
-      child: WebView(
-        initialUrl: url,
-        javascriptMode: JavascriptMode.unrestricted,
+      child: WebViewWidget(
+        controller: WebViewController()
+          ..loadRequest(Uri.parse(url))
+          ..setJavaScriptMode(JavaScriptMode.unrestricted),
       ),
     );
   }

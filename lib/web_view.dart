@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:universal_html/html.dart' as html;
+import 'dart:ui' as ui;
 
 class WebKinescopePlayer extends StatelessWidget {
   final String url;
@@ -15,7 +16,8 @@ class WebKinescopePlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Регистрируем view factory
-    registerViewFactory(viewType, (int viewId) {
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
       final iframe = html.IFrameElement()
         ..src = url
         ..style.border = 'none'
