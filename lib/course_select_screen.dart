@@ -15,26 +15,26 @@ class KinescopePlayerWidget extends StatelessWidget {
   final String videoUrl;
   final String id;
 
-  KinescopePlayerWidget({required this.videoUrl, required this.id}) {
+  KinescopePlayerWidget({required this.videoUrl, required this.id});
+
+  @override
+  Widget build(BuildContext context) {
     if (kIsWeb) {
-      registerWebViewFactory('kinescope-player-$id', (int viewId) {
+      final viewType = 'kinescope-player-$id';
+      // Проверяем, есть ли уже iframe с таким id
+      if (html.document.getElementById(viewType) == null) {
         final iframe = html.IFrameElement()
           ..src = videoUrl
           ..style.border = 'none'
           ..allowFullscreen = true
           ..width = '100%'
-          ..height = '315';
-        return iframe;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (kIsWeb) {
+          ..height = '315'
+          ..id = viewType;
+        html.document.body!.append(iframe);
+      }
       return SizedBox(
         height: 315,
-        child: HtmlElementView(viewType: 'kinescope-player-$id'),
+        child: HtmlElementView(viewType: viewType),
       );
     } else {
       return const SizedBox.shrink();
