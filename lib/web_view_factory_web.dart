@@ -2,9 +2,6 @@
 import 'dart:ui' as ui;
 import 'package:universal_html/html.dart' as html;
 
-export 'web_view_factory_stub.dart'
-  if (dart.library.html) 'web_view_factory_web.dart';
-
 void registerKinescopeViewFactory(String viewType, String url) {
   // ignore: undefined_prefixed_name
   ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
