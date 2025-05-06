@@ -5,7 +5,35 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
+class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
+  @override
+  Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    final String? text = element.textContent;
+    final String? href = element.attributes['href'];
+    if (href == null) return const SizedBox();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () => launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication),
+          child: Text(
+            text ?? href,
+            style: preferredStyle?.copyWith(color: Colors.blue, decoration: TextDecoration.underline),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.copy, size: 16),
+          tooltip: 'Копировать адрес ссылки',
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: href));
+          },
+        ),
+      ],
+    );
+  }
+}
 
 class CourseSelectScreen extends StatelessWidget {
   final String title;
@@ -112,11 +140,7 @@ class CourseDetailScreen extends StatelessWidget {
                         fontFamily: 'monospace',
                       ),
                     ),
-                    onTapLink: (text, href, title) {
-                      if (href != null) {
-                        launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
-                      }
-                    },
+                    builders: {'a': LinkWithCopyButtonBuilder()},
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -209,11 +233,7 @@ class LessonDetailScreen extends StatelessWidget {
                       fontFamily: 'monospace',
                     ),
                   ),
-                  onTapLink: (text, href, title) {
-                    if (href != null) {
-                      launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
-                    }
-                  },
+                  builders: {'a': LinkWithCopyButtonBuilder()},
                 ),
               ),
             const Divider(height: 32, thickness: 1),
@@ -226,11 +246,7 @@ class LessonDetailScreen extends StatelessWidget {
                   fontFamily: 'monospace',
                 ),
               ),
-              onTapLink: (text, href, title) {
-                if (href != null) {
-                  launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication);
-                }
-              },
+              builders: {'a': LinkWithCopyButtonBuilder()},
             ),
           ],
         ),
