@@ -9,35 +9,42 @@ import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'dart:ui' as ui;
 import 'dart:html' as html;
+import 'package:media_kit_video/media_kit_video.dart';
+import 'package:media_kit/media_kit.dart';
 
-class KinescopePlayerWidget extends StatelessWidget {
+class KinescopePlayerWidget extends StatefulWidget {
   final String videoUrl;
-  final String id;
+  const KinescopePlayerWidget({required this.videoUrl, super.key});
 
-  KinescopePlayerWidget({required this.videoUrl, required this.id});
+  @override
+  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
+}
+
+class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
+  late final player = Player();
+  late final videoController = VideoController(player);
+
+  @override
+  void initState() {
+    super.initState();
+    player.open(Media(widget.videoUrl));
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      final viewType = 'kinescope-player-$id';
-      // Проверяем, есть ли уже iframe с таким id
-      if (html.document.getElementById(viewType) == null) {
-        final iframe = html.IFrameElement()
-          ..src = videoUrl
-          ..style.border = 'none'
-          ..allowFullscreen = true
-          ..width = '100%'
-          ..height = '315'
-          ..id = viewType;
-        html.document.body!.append(iframe);
-      }
-      return SizedBox(
-        height: 315,
-        child: HtmlElementView(viewType: viewType),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Video(
+        controller: videoController,
+        controls: VideoControls.adaptive,
+      ),
+    );
   }
 }
 
@@ -71,34 +78,10 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
     }
     if (_isKinescopeUrl(href)) {
       final url = _normalizeKinescopeUrl(href);
-      final id = url.split('/').last;
-      if (kIsWeb) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: KinescopePlayerWidget(videoUrl: url, id: id),
-        );
-      } else {
-        // На других платформах просто ссылка
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              onTap: () => launchUrl(Uri.parse(href), mode: LaunchMode.externalApplication),
-              child: Text(
-                text ?? href,
-                style: preferredStyle?.copyWith(color: Colors.blue, decoration: TextDecoration.underline),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.copy, size: 16),
-              tooltip: 'Копировать адрес ссылки',
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: href));
-              },
-            ),
-          ],
-        );
-      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: KinescopePlayerWidget(videoUrl: url),
+      );
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
