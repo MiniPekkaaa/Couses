@@ -22,13 +22,20 @@ class KinescopePlayerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final url = 'https://kinescope.io/embed/$videoId';
     if (kIsWeb) {
+      final viewType = 'kinescope-player-$videoId';
+      // ignore: undefined_prefixed_name
+      ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
+        final iframe = html.IFrameElement()
+          ..src = url
+          ..style.border = 'none'
+          ..allowFullscreen = true
+          ..width = '100%'
+          ..height = '315';
+        return iframe;
+      });
       return SizedBox(
         height: 315,
-        child: IFrameView(
-          src: url,
-          id: 'kinescope-player-$videoId',
-          allow: 'autoplay; fullscreen',
-        ),
+        child: HtmlElementView(viewType: viewType),
       );
     } else {
       return SizedBox(
