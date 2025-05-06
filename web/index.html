@@ -18,36 +18,36 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="TevaLearn LMS MiniApp">
+  <meta name="description" content="A new Flutter project.">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="tevalearn_miniapp">
+  <meta name="apple-mobile-web-app-title" content="tevalearn_tg_miniapp">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>TevaLearn LMS</title>
+  <title>tevalearn_tg_miniapp</title>
   <link rel="manifest" href="manifest.json">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = null;
+  </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
-
-  <!-- Kinescope Player SDK -->
-  <script src="https://player.kinescope.io/latest/player.js"></script>
 </head>
 <body>
   <script>
     window.addEventListener('load', function(ev) {
-      _flutter.loader.load({
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
         serviceWorker: {
-          serviceWorkerVersion: '{{flutter_service_worker_version}}',
+          serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
@@ -56,28 +56,6 @@
         }
       });
     });
-
-    // Функция для создания плеера Kinescope
-    function createKinescopePlayer(videoId, containerId) {
-      const container = document.getElementById(containerId);
-      if (container) {
-        const player = new Kinescope.Player(container, {
-          video: videoId,
-          width: '100%',
-          height: '100%',
-          controls: true,
-          autoplay: false,
-          muted: false,
-        });
-        return player;
-      }
-      return null;
-    }
-
-    // Регистрация платформенного view для Kinescope
-    window.registerKinescopePlayer = function(videoId, containerId) {
-      return createKinescopePlayer(videoId, containerId);
-    };
   </script>
 </body>
 </html>

@@ -14,8 +14,7 @@ dependencies:
   shared_preferences: ^2.2.0
   flutter_markdown: ^0.6.18
   youtube_player_flutter: ^8.1.2
-  url_launcher: ^6.2.4
-  webview_flutter: ^4.7.0
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

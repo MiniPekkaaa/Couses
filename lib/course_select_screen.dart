@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
-import 'kinescope_player.dart';
 
 
 class CourseSelectScreen extends StatelessWidget {
@@ -173,47 +172,55 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
-  String? _extractVideoId(String content) {
-    final regex = RegExp(r'kinescope\.io/embed/([a-zA-Z0-9]+)');
-    final match = regex.firstMatch(content);
-    return match?.group(1);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final videoId = _extractVideoId(lesson['content'] ?? '');
-    
+    final content = (lesson['Content'] ?? '').replaceAll(r'\\n', '\n').replaceAll(r'\n', '\n');
+    final videoUrl = lesson['Video URL'] ?? '';
+    final videoId = YoutubePlayer.convertUrlToId(videoUrl);
     return Scaffold(
       appBar: AppBar(
-        title: Text(lesson['title'] ?? ''),
+        title: Text(lesson['Name'] ?? 'Урок'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
           children: [
-            if (lesson['description'] != null)
-              MarkdownBody(
-                data: lesson['description'],
-                styleSheet: MarkdownStyleSheet(
-                  p: const TextStyle(fontSize: 16),
-                  a: const TextStyle(color: Colors.blue),
-                ),
-              ),
+            Text(
+              lesson['Description'] ?? '',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 16),
-            if (videoId != null)
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: KinescopePlayer(videoId: videoId),
+            MarkdownBody(
+              data: content,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                p: const TextStyle(fontSize: 15),
+                h1: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                h2: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                h3: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            const SizedBox(height: 16),
-            if (lesson['content'] != null)
-              MarkdownBody(
-                data: lesson['content'],
-                styleSheet: MarkdownStyleSheet(
-                  p: const TextStyle(fontSize: 16),
-                  a: const TextStyle(color: Colors.blue),
+            ),
+            const SizedBox(height: 24),
+            if (videoId != null && !kIsWeb && (Platform.isAndroid || Platform.isIOS))
+              YoutubePlayer(
+                controller: YoutubePlayerController(
+                  initialVideoId: videoId,
+                  flags: const YoutubePlayerFlags(
+                    autoPlay: false,
+                    mute: false,
+                  ),
                 ),
+                showVideoProgressIndicator: true,
+              )
+            else if (videoUrl.isNotEmpty)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.play_circle_fill),
+                label: const Text('Смотреть видео'),
+                onPressed: () async {
+                  final uri = Uri.parse(videoUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
               ),
           ],
         ),
