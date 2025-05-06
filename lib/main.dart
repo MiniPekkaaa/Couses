@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:universal_html/html.dart' as html;
+import 'web_init.dart';
 
 void main() {
+  if (kIsWeb) {
+    initWeb();
+  }
   runApp(const MyApp());
 }
 
