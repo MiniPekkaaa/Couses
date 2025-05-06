@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'dart:ui' as ui;
 import 'dart:html' as html;
-import 'web_view_registry.dart';
 
 class KinescopePlayerWidget extends StatelessWidget {
   final String videoUrl;
