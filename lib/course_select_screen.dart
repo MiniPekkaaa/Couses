@@ -313,6 +313,16 @@ class LessonDetailScreen extends StatelessWidget {
               ),
               builders: {'a': LinkWithCopyButtonBuilder()},
             ),
+            if (lesson['video'] != null &&
+                lesson['video'] is List &&
+                (lesson['video'] as List).isNotEmpty &&
+                (lesson['video'][0]['url'] != null))
+              Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: VideoPlayerWidget(
+                  videoUrl: lesson['video'][0]['url'],
+                ),
+              ),
           ],
         ),
       ),
