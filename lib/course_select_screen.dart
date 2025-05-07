@@ -23,12 +23,7 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
-
-  @override
-  void initState() {
-    super.initState();
-    player.open(Media(widget.videoUrl));
-  }
+  bool _isPlaying = false;
 
   @override
   void dispose() {
@@ -36,29 +31,45 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.dispose();
   }
 
+  void _playVideo() {
+    player.open(Media(widget.videoUrl));
+    setState(() {
+      _isPlaying = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: Video(
-        controller: videoController,
-      ),
+      child: _isPlaying
+          ? Video(controller: videoController)
+          : Stack(
+              children: [
+                Container(
+                  color: Colors.black,
+                  child: const Center(
+                    child: Icon(Icons.videocam, color: Colors.white, size: 64),
+                  ),
+                ),
+                Center(
+                  child: IconButton(
+                    icon: const Icon(Icons.play_circle_fill, color: Colors.white, size: 64),
+                    onPressed: _playVideo,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
 
 class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
   static final _imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
-  static final _videoExtensions = ['.mp4', '.webm', '.mov', '.mkv', '.avi'];
 
   bool _isImageUrl(String url) {
     final lower = url.toLowerCase();
     return _imageExtensions.any((ext) => lower.endsWith(ext));
-  }
-
-  bool _isDirectVideoUrl(String url) {
-    final lower = url.toLowerCase();
-    return (url.contains('archive.org') && _videoExtensions.any((ext) => lower.endsWith(ext)));
   }
 
   @override
@@ -70,12 +81,6 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
-      );
-    }
-    if (_isDirectVideoUrl(href)) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: VideoPlayerWidget(videoUrl: href),
       );
     }
     return Row(
