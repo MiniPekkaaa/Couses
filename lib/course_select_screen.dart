@@ -270,7 +270,8 @@ class CourseDetailScreen extends StatelessWidget {
                           .where((lesson) =>
                               lesson['Course'] != null &&
                               (lesson['Course'] as List).contains(course['id']))
-                          .toList();
+                          .toList()
+                        ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
