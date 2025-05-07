@@ -24,9 +24,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
   bool _isPlaying = false;
+  bool _isFullscreen = false;
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     player.dispose();
     super.dispose();
   }
@@ -36,26 +40,82 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     setState(() {
       _isPlaying = true;
     });
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  void _toggleFullscreen() {
+    setState(() {
+      _isFullscreen = !_isFullscreen;
+    });
+    if (_isFullscreen) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final videoWidget = Video(controller: videoController);
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: _isPlaying
-          ? Video(controller: videoController)
+          ? Stack(
+              children: [
+                Positioned.fill(child: videoWidget),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    icon: Icon(_isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                        color: Colors.white, size: 32),
+                    onPressed: _toggleFullscreen,
+                  ),
+                ),
+              ],
+            )
           : Stack(
               children: [
                 Container(
                   color: Colors.black,
                   child: const Center(
-                    child: Icon(Icons.videocam, color: Colors.white, size: 64),
+                    child: Icon(Icons.videocam, color: Colors.white24, size: 80),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.4),
                   ),
                 ),
                 Center(
-                  child: IconButton(
-                    icon: const Icon(Icons.play_circle_fill, color: Colors.white, size: 64),
-                    onPressed: _playVideo,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(48),
+                          onTap: _playVideo,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(24),
+                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 64),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Смотреть видео',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, shadows: [Shadow(blurRadius: 4, color: Colors.black)]),
+                      ),
+                    ],
                   ),
                 ),
               ],
