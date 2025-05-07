@@ -24,13 +24,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
   bool _isPlaying = false;
-  bool _isFullscreen = false;
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    }
     player.dispose();
     super.dispose();
   }
@@ -40,21 +41,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     setState(() {
       _isPlaying = true;
     });
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  void _toggleFullscreen() {
-    setState(() {
-      _isFullscreen = !_isFullscreen;
-    });
-    if (_isFullscreen) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
     }
   }
 
@@ -64,20 +56,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: _isPlaying
-          ? Stack(
-              children: [
-                Positioned.fill(child: videoWidget),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: IconButton(
-                    icon: Icon(_isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-                        color: Colors.white, size: 32),
-                    onPressed: _toggleFullscreen,
-                  ),
-                ),
-              ],
-            )
+          ? videoWidget
           : Stack(
               children: [
                 Container(
