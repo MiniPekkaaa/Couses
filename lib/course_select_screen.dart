@@ -267,9 +267,17 @@ class CourseDetailScreen extends StatelessWidget {
                         return const Center(child: CircularProgressIndicator());
                       }
                       final lessons = snapshot.data!
-                          .where((lesson) =>
-                              lesson['Course'] != null &&
-                              (lesson['Course'] as List).contains(course['id']))
+                          .where((lesson) {
+                            final courseField = lesson['Course'];
+                            if (courseField == null) return false;
+                            if (courseField is List) {
+                              return courseField.contains(course['id']);
+                            }
+                            if (courseField is String) {
+                              return courseField == course['id'];
+                            }
+                            return false;
+                          })
                           .toList()
                         ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
                       if (lessons.isEmpty) {
