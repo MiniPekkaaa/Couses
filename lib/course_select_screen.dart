@@ -315,26 +315,52 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
-  String _replaceImagePlaceholders(String content, Map<String, dynamic> lesson) {
-    // Заменяем image 1, image 2 ... image 10 на реальные ссылки, если они есть
-    String result = content;
-    for (int i = 1; i <= 10; i++) {
-      final key = 'image $i';
-      final value = lesson[key];
-      if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-        // Поддержка markdown синтаксиса ![image 1](image 1)
-        result = result.replaceAllMapped(
-          RegExp(r'!\[.*?\]\(' + key + r'\)', caseSensitive: false),
-          (match) => '![$key](${value[0]['url']})',
-        );
-        // Поддержка просто image 1 (без markdown)
-        result = result.replaceAll(
-          key,
-          '![$key](${value[0]['url']})',
-        );
+  // Вставка видео и картинок по плейсхолдерам
+  List<Widget> _parseRichContent(String content, Map<String, dynamic> lesson) {
+    final List<Widget> widgets = [];
+    final lines = content.split('\n');
+    bool videoInserted = false;
+    for (final line in lines) {
+      bool matched = false;
+      // Видео
+      for (int i = 1; i <= 10; i++) {
+        final key = 'video $i';
+        final value = lesson[key];
+        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: VideoPlayerWidget(videoUrl: value[0]['url']),
+          ));
+          matched = true;
+          videoInserted = true;
+          break;
+        }
+      }
+      // Картинки
+      for (int i = 1; i <= 10; i++) {
+        final key = 'image $i';
+        final value = lesson[key];
+        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+          ));
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        widgets.add(SelectableText(line));
       }
     }
-    return result;
+    // Если ни одного видео не вставили, но есть video 1, вставляем его в конец
+    if (!videoInserted && lesson['video 1'] != null && lesson['video 1'] is List && lesson['video 1'].isNotEmpty && lesson['video 1'][0]['url'] != null) {
+      widgets.add(Padding(
+        padding: const EdgeInsets.only(top: 24.0),
+        child: VideoPlayerWidget(videoUrl: lesson['video 1'][0]['url']),
+      ));
+    }
+    return widgets;
   }
 
   @override
@@ -369,27 +395,7 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            MarkdownBody(
-              data: _replaceImagePlaceholders(lesson['Content'] ?? '', lesson),
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                a: const TextStyle(color: Colors.blue),
-                code: const TextStyle(
-                  backgroundColor: Color(0xFFF5F5F5),
-                  fontFamily: 'monospace',
-                ),
-              ),
-              builders: {'a': LinkWithCopyButtonBuilder()},
-            ),
-            if (lesson['video'] != null &&
-                lesson['video'] is List &&
-                (lesson['video'] as List).isNotEmpty &&
-                (lesson['video'][0]['url'] != null))
-              Padding(
-                padding: const EdgeInsets.only(top: 24.0),
-                child: VideoPlayerWidget(
-                  videoUrl: lesson['video'][0]['url'],
-                ),
-              ),
+            ..._parseRichContent(lesson['Content'] ?? '', lesson),
           ],
         ),
       ),
