@@ -239,7 +239,10 @@ class CourseDetailScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CourseDetailScreen(course: course),
+              builder: (context) => LessonDetailScreen(
+                lesson: course,
+                allLessons: itemsCollection,
+              ),
             ),
           );
         },
