@@ -329,42 +329,8 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
-  String _replaceMediaPlaceholders(String content, Map<String, dynamic> lesson) {
-    String result = content;
-    // Картинки
-    for (int i = 1; i <= 10; i++) {
-      final key = 'image $i';
-      final value = lesson[key];
-      if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-        result = result.replaceAll(
-          key,
-          '![](${value[0]['url']})',
-        );
-      }
-    }
-    // Видео
-    for (int i = 1; i <= 10; i++) {
-      final key = 'video $i';
-      final value = lesson[key];
-      if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-        result = result.replaceAll(
-          key,
-          '[video](${value[0]['url']})',
-        );
-      }
-    }
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
-    String content = lesson['Content'] ?? '';
-    content = _replaceMediaPlaceholders(content, lesson);
-    // Если ни одного [video](url) не найдено, но есть video 1, добавим его в конец
-    bool hasVideoTag = RegExp(r'\[video\]\([^)]+\)').hasMatch(content);
-    if (!hasVideoTag && lesson['video 1'] != null && lesson['video 1'] is List && lesson['video 1'].isNotEmpty && lesson['video 1'][0]['url'] != null) {
-      content += '\n[video](${lesson['video 1'][0]['url']})';
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson['Name'] ?? 'Урок'),
@@ -395,19 +361,9 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            MarkdownBody(
-              data: content,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                a: const TextStyle(color: Colors.blue),
-                code: const TextStyle(
-                  backgroundColor: Color(0xFFF5F5F5),
-                  fontFamily: 'monospace',
-                ),
-              ),
-              builders: {
-                'a': LinkWithCopyButtonBuilder(),
-                'video': VideoMarkdownBuilder(),
-              },
+            SelectableText(
+              lesson['Content'] ?? '',
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
         ),
