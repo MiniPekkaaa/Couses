@@ -278,8 +278,8 @@ class CourseDetailScreen extends StatelessWidget {
                             }
                             return false;
                           })
-                          .toList()
-                        ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+                          .toList();
+                      lessons.sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
