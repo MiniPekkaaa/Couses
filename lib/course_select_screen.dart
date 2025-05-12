@@ -12,37 +12,93 @@ import 'dart:html' as html;
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit/media_kit.dart';
 
-class KinescopePlayerWidget extends StatefulWidget {
+class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
-  const KinescopePlayerWidget({required this.videoUrl, super.key});
+  const VideoPlayerWidget({required this.videoUrl, super.key});
 
   @override
-  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
+  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
-class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
-
-  @override
-  void initState() {
-    super.initState();
-    player.open(Media(widget.videoUrl));
-  }
+  bool _isPlaying = false;
 
   @override
   void dispose() {
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    }
     player.dispose();
     super.dispose();
   }
 
+  void _playVideo() {
+    player.open(Media(widget.videoUrl));
+    setState(() {
+      _isPlaying = true;
+    });
+    if (!kIsWeb) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final videoWidget = Video(controller: videoController);
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: Video(
-        controller: videoController,
-      ),
+      child: _isPlaying
+          ? videoWidget
+          : Stack(
+              children: [
+                Container(
+                  color: Colors.black,
+                  child: const Center(
+                    child: Icon(Icons.videocam, color: Colors.white24, size: 80),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.4),
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(48),
+                          onTap: _playVideo,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(24),
+                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 64),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Смотреть видео',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, shadows: [Shadow(blurRadius: 4, color: Colors.black)]),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -55,15 +111,6 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
     return _imageExtensions.any((ext) => lower.endsWith(ext));
   }
 
-  bool _isKinescopeUrl(String url) {
-    return url.contains('kinescope.io');
-  }
-
-  String _normalizeKinescopeUrl(String url) {
-    // Убираем @ в начале, если есть
-    return url.startsWith('@') ? url.substring(1) : url;
-  }
-
   @override
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final String? text = element.textContent;
@@ -73,13 +120,6 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
-      );
-    }
-    if (_isKinescopeUrl(href)) {
-      final url = _normalizeKinescopeUrl(href);
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: KinescopePlayerWidget(videoUrl: url),
       );
     }
     return Row(
@@ -230,7 +270,8 @@ class CourseDetailScreen extends StatelessWidget {
                           .where((lesson) =>
                               lesson['Course'] != null &&
                               (lesson['Course'] as List).contains(course['id']))
-                          .toList();
+                          .toList()
+                        ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
@@ -274,6 +315,54 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
+  // Вставка видео и картинок по плейсхолдерам
+  List<Widget> _parseRichContent(String content, Map<String, dynamic> lesson) {
+    final List<Widget> widgets = [];
+    final lines = content.split('\n');
+    bool videoInserted = false;
+    for (final line in lines) {
+      bool matched = false;
+      // Видео
+      for (int i = 1; i <= 10; i++) {
+        final key = 'video $i';
+        final value = lesson[key];
+        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: VideoPlayerWidget(videoUrl: value[0]['url']),
+          ));
+          matched = true;
+          videoInserted = true;
+          break;
+        }
+      }
+      // Картинки
+      for (int i = 1; i <= 10; i++) {
+        final key = 'image $i';
+        final value = lesson[key];
+        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+          ));
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        widgets.add(SelectableText(line));
+      }
+    }
+    // Если ни одного видео не вставили, но есть video 1, вставляем его в конец
+    if (!videoInserted && lesson['video 1'] != null && lesson['video 1'] is List && lesson['video 1'].isNotEmpty && lesson['video 1'][0]['url'] != null) {
+      widgets.add(Padding(
+        padding: const EdgeInsets.only(top: 24.0),
+        child: VideoPlayerWidget(videoUrl: lesson['video 1'][0]['url']),
+      ));
+    }
+    return widgets;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -306,17 +395,7 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            MarkdownBody(
-              data: lesson['Content'] ?? '',
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                a: const TextStyle(color: Colors.blue),
-                code: const TextStyle(
-                  backgroundColor: Color(0xFFF5F5F5),
-                  fontFamily: 'monospace',
-                ),
-              ),
-              builders: {'a': LinkWithCopyButtonBuilder()},
-            ),
+            ..._parseRichContent(lesson['Content'] ?? '', lesson),
           ],
         ),
       ),
