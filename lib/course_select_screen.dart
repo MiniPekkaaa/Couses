@@ -12,93 +12,37 @@ import 'dart:html' as html;
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit/media_kit.dart';
 
-class VideoPlayerWidget extends StatefulWidget {
+class KinescopePlayerWidget extends StatefulWidget {
   final String videoUrl;
-  const VideoPlayerWidget({required this.videoUrl, super.key});
+  const KinescopePlayerWidget({required this.videoUrl, super.key});
 
   @override
-  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+  State<KinescopePlayerWidget> createState() => _KinescopePlayerWidgetState();
 }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+class _KinescopePlayerWidgetState extends State<KinescopePlayerWidget> {
   late final player = Player();
   late final videoController = VideoController(player);
-  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    player.open(Media(widget.videoUrl));
+  }
 
   @override
   void dispose() {
-    if (!kIsWeb) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-    }
     player.dispose();
     super.dispose();
   }
 
-  void _playVideo() {
-    player.open(Media(widget.videoUrl));
-    setState(() {
-      _isPlaying = true;
-    });
-    if (!kIsWeb) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final videoWidget = Video(controller: videoController);
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: _isPlaying
-          ? videoWidget
-          : Stack(
-              children: [
-                Container(
-                  color: Colors.black,
-                  child: const Center(
-                    child: Icon(Icons.videocam, color: Colors.white24, size: 80),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.4),
-                  ),
-                ),
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(48),
-                          onTap: _playVideo,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(24),
-                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 64),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Смотреть видео',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, shadows: [Shadow(blurRadius: 4, color: Colors.black)]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      child: Video(
+        controller: videoController,
+      ),
     );
   }
 }
@@ -111,6 +55,15 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
     return _imageExtensions.any((ext) => lower.endsWith(ext));
   }
 
+  bool _isKinescopeUrl(String url) {
+    return url.contains('kinescope.io');
+  }
+
+  String _normalizeKinescopeUrl(String url) {
+    // Убираем @ в начале, если есть
+    return url.startsWith('@') ? url.substring(1) : url;
+  }
+
   @override
   Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final String? text = element.textContent;
@@ -120,6 +73,13 @@ class LinkWithCopyButtonBuilder extends MarkdownElementBuilder {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Image.network(href, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+      );
+    }
+    if (_isKinescopeUrl(href)) {
+      final url = _normalizeKinescopeUrl(href);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: KinescopePlayerWidget(videoUrl: url),
       );
     }
     return Row(
@@ -270,8 +230,7 @@ class CourseDetailScreen extends StatelessWidget {
                           .where((lesson) =>
                               lesson['Course'] != null &&
                               (lesson['Course'] as List).contains(course['id']))
-                          .toList()
-                        ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+                          .toList();
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
@@ -307,20 +266,6 @@ class CourseDetailScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class VideoMarkdownBuilder extends MarkdownElementBuilder {
-  @override
-  Widget visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    final url = element.attributes['href'];
-    if (url != null && url.isNotEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: VideoPlayerWidget(videoUrl: url),
-      );
-    }
-    return const SizedBox();
   }
 }
 
@@ -361,9 +306,16 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            SelectableText(
-              lesson['Content'] ?? '',
-              style: Theme.of(context).textTheme.bodyLarge,
+            MarkdownBody(
+              data: lesson['Content'] ?? '',
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                a: const TextStyle(color: Colors.blue),
+                code: const TextStyle(
+                  backgroundColor: Color(0xFFF5F5F5),
+                  fontFamily: 'monospace',
+                ),
+              ),
+              builders: {'a': LinkWithCopyButtonBuilder()},
             ),
           ],
         ),
