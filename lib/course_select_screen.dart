@@ -201,6 +201,13 @@ class CourseDetailScreen extends StatelessWidget {
 
   const CourseDetailScreen({Key? key, required this.course}) : super(key: key);
 
+  // Автоисправление markdown: убираем пробелы перед ** и __
+  String _fixMarkdownFormatting(String text) {
+    return text
+      .replaceAllMapped(RegExp(r'\s+(\*\*|__)'), (m) => m[1]!)
+      .replaceAllMapped(RegExp(r'(\*\*|__)\s+'), (m) => m[1]!);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -241,7 +248,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: course['Description'] ?? 'No description',
+                    data: _fixMarkdownFormatting(course['Description'] ?? 'No description'),
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -401,7 +408,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: lesson['Description'] ?? '',
+                  data: _fixMarkdownFormatting(lesson['Description'] ?? ''),
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
