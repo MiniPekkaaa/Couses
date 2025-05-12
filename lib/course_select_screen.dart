@@ -315,6 +315,28 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
+  String _replaceImagePlaceholders(String content, Map<String, dynamic> lesson) {
+    // Заменяем image 1, image 2 ... image 10 на реальные ссылки, если они есть
+    String result = content;
+    for (int i = 1; i <= 10; i++) {
+      final key = 'image $i';
+      final value = lesson[key];
+      if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+        // Поддержка markdown синтаксиса ![image 1](image 1)
+        result = result.replaceAllMapped(
+          RegExp(r'!\[.*?\]\(' + key + r'\)', caseSensitive: false),
+          (match) => '![$key](${value[0]['url']})',
+        );
+        // Поддержка просто image 1 (без markdown)
+        result = result.replaceAll(
+          key,
+          '![$key](${value[0]['url']})',
+        );
+      }
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -348,7 +370,7 @@ class LessonDetailScreen extends StatelessWidget {
               ),
             const Divider(height: 32, thickness: 1),
             MarkdownBody(
-              data: lesson['Content'] ?? '',
+              data: _replaceImagePlaceholders(lesson['Content'] ?? '', lesson),
               styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                 a: const TextStyle(color: Colors.blue),
                 code: const TextStyle(
