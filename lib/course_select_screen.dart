@@ -350,7 +350,20 @@ class LessonDetailScreen extends StatelessWidget {
         }
       }
       if (!matched) {
-        widgets.add(SelectableText(line));
+        // Вот здесь меняем: если строка не плейсхолдер, отображаем её через MarkdownBody
+        widgets.add(
+          MarkdownBody(
+            data: line,
+            styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+              a: const TextStyle(color: Colors.blue),
+              code: const TextStyle(
+                backgroundColor: Color(0xFFF5F5F5),
+                fontFamily: 'monospace',
+              ),
+            ),
+            builders: {'a': LinkWithCopyButtonBuilder()},
+          ),
+        );
       }
     }
     // Если ни одного видео не вставили, но есть video 1, вставляем его в конец
