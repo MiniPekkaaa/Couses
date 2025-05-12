@@ -28,22 +28,29 @@ class AirtableService {
   }
 
   static Future<List<Map<String, dynamic>>> fetchLessons() async {
-    final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable';
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $apiKey'},
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(
-        data['records'].map((r) {
-          final map = Map<String, dynamic>.from(r['fields']);
-          map['id'] = r['id'];
-          return map;
-        })
+    final List<Map<String, dynamic>> allLessons = [];
+    String? offset;
+    do {
+      final url = 'https://api.airtable.com/v0/$baseId/$lessonsTable'
+          '${offset != null ? '?offset=$offset' : ''}';
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $apiKey'},
       );
-    } else {
-      throw Exception('Ошибка загрузки уроков: ${response.body}');
-    }
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        allLessons.addAll(List<Map<String, dynamic>>.from(
+          data['records'].map((r) {
+            final map = Map<String, dynamic>.from(r['fields']);
+            map['id'] = r['id'];
+            return map;
+          })
+        ));
+        offset = data['offset'];
+      } else {
+        throw Exception('Ошибка загрузки уроков: \\${response.body}');
+      }
+    } while (offset != null);
+    return allLessons;
   }
 } 
