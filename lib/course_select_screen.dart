@@ -316,7 +316,7 @@ class LessonDetailScreen extends StatelessWidget {
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
   // Вставка видео и картинок по плейсхолдерам
-  List<Widget> _parseRichContent(String content, Map<String, dynamic> lesson) {
+  List<Widget> _parseRichContent(BuildContext context, String content, Map<String, dynamic> lesson) {
     final List<Widget> widgets = [];
     final lines = content.split('\n');
     bool videoInserted = false;
@@ -350,7 +350,6 @@ class LessonDetailScreen extends StatelessWidget {
         }
       }
       if (!matched) {
-        // Вот здесь меняем: если строка не плейсхолдер, отображаем её через MarkdownBody
         widgets.add(
           MarkdownBody(
             data: line,
@@ -408,7 +407,7 @@ class LessonDetailScreen extends StatelessWidget {
                 ),
               ),
             const Divider(height: 32, thickness: 1),
-            ..._parseRichContent(lesson['Content'] ?? '', lesson),
+            ..._parseRichContent(context, lesson['Content'] ?? '', lesson),
           ],
         ),
       ),
