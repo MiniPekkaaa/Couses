@@ -197,55 +197,122 @@ class CourseSelectScreen extends StatelessWidget {
 }
 
 class CourseDetailScreen extends StatelessWidget {
-  final String title;
-  final List<Map<String, dynamic>> itemsCollection;
-  final String categoryField;
+  final Map<String, dynamic> course;
 
-  CourseDetailScreen({
-    required this.title,
-    required this.itemsCollection,
-    required this.categoryField,
-  });
+  const CourseDetailScreen({Key? key, required this.course}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(course['Name'] ?? 'Course Details'),
       ),
-      body: ListView.builder(
-        itemCount: itemsCollection.length,
-        itemBuilder: (context, index) => _buildCourseCard(context, itemsCollection[index]),
-      ),
-    );
-  }
-
-  Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: Image.network(
-          course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
-              ? course['Image'][0]['url']
-              : 'https://via.placeholder.com/50',
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
-        ),
-        title: Text(course['Name'] ?? 'Untitled'),
-        subtitle: Text(course['Instructor'] ?? 'Unknown Instructor'),
-        trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LessonDetailScreen(
-                lesson: course,
-                allLessons: itemsCollection,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(
+              course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
+                  ? course['Image'][0]['url']
+                  : 'https://via.placeholder.com/150',
+              height: 250,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    course['Name'] ?? 'Untitled',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Инструктор: ${course['Instructor'] ?? 'Unknown'}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  MarkdownBody(
+                    data: course['Description'] ?? 'No description',
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                      a: const TextStyle(color: Colors.blue),
+                      code: const TextStyle(
+                        backgroundColor: Color(0xFFF5F5F5),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    builders: {'a': LinkWithCopyButtonBuilder()},
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Уроки курса',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: AirtableService.fetchLessons(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final lessons = snapshot.data!
+                          .where((lesson) {
+                            final courseField = lesson['Course'];
+                            if (courseField == null) return false;
+                            if (courseField is List) {
+                              return courseField.contains(course['id']);
+                            }
+                            if (courseField is String) {
+                              return courseField == course['id'];
+                            }
+                            return false;
+                          })
+                          .toList();
+                      lessons.sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+                      if (lessons.isEmpty) {
+                        return const Text('Нет уроков');
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: lessons.length,
+                        itemBuilder: (context, index) {
+                          final lesson = lessons[index];
+                          return Card(
+                            child: ListTile(
+                              title: Text(lesson['Name'] ?? ''),
+                              subtitle: Text(lesson['Duration'] ?? ''),
+                              trailing: const Icon(Icons.play_circle_outline),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LessonDetailScreen(lesson: lesson),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -253,9 +320,8 @@ class CourseDetailScreen extends StatelessWidget {
 
 class LessonDetailScreen extends StatelessWidget {
   final Map<String, dynamic> lesson;
-  final List<Map<String, dynamic>>? allLessons;
 
-  const LessonDetailScreen({Key? key, required this.lesson, this.allLessons}) : super(key: key);
+  const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
   // Автоисправление markdown: убираем пробелы перед ** и __
   String _fixMarkdownFormatting(String text) {
@@ -325,17 +391,6 @@ class LessonDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Найти следующий урок по Order
-    Map<String, dynamic>? nextLesson;
-    if (allLessons != null && allLessons!.isNotEmpty) {
-      final currentOrder = lesson['Order'] ?? 0;
-      final sorted = List<Map<String, dynamic>>.from(allLessons!)
-        ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
-      final idx = sorted.indexWhere((l) => l['id'] == lesson['id']);
-      if (idx != -1 && idx < sorted.length - 1) {
-        nextLesson = sorted[idx + 1];
-      }
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson['Name'] ?? 'Урок'),
@@ -367,24 +422,6 @@ class LessonDetailScreen extends StatelessWidget {
               ),
             const Divider(height: 32, thickness: 1),
             ..._parseRichContent(context, lesson['Content'] ?? '', lesson),
-            if (nextLesson != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 32.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LessonDetailScreen(
-                          lesson: nextLesson!,
-                          allLessons: allLessons,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Перейти к "${nextLesson!['Name'] ?? 'следующий урок'}"'),
-                ),
-              ),
           ],
         ),
       ),
