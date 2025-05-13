@@ -379,33 +379,41 @@ class LessonDetailScreen extends StatelessWidget {
     final List<Widget> widgets = [];
     final lines = content.split('\n');
     bool videoInserted = false;
+    final videoReg = RegExp(r'\{video (\d+)\}');
+    final imageReg = RegExp(r'\{image (\d+)\}');
     for (final line in lines) {
       bool matched = false;
-      // Видео
-      for (int i = 1; i <= 10; i++) {
-        final key = 'video $i';
-        final value = lesson[key];
-        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-          widgets.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: VideoPlayerWidget(videoUrl: value[0]['url']),
-          ));
-          matched = true;
-          videoInserted = true;
-          break;
+      // Видео по {video n}
+      final videoMatch = videoReg.firstMatch(line.trim());
+      if (videoMatch != null) {
+        final n = int.tryParse(videoMatch.group(1)!);
+        if (n != null) {
+          final key = 'video $n';
+          final value = lesson[key];
+          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+            widgets.add(Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: VideoPlayerWidget(videoUrl: value[0]['url']),
+            ));
+            matched = true;
+            videoInserted = true;
+          }
         }
       }
-      // Картинки
-      for (int i = 1; i <= 10; i++) {
-        final key = 'image $i';
-        final value = lesson[key];
-        if (line.trim() == key && value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-          widgets.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
-          ));
-          matched = true;
-          break;
+      // Картинки по {image n}
+      final imageMatch = imageReg.firstMatch(line.trim());
+      if (imageMatch != null) {
+        final n = int.tryParse(imageMatch.group(1)!);
+        if (n != null) {
+          final key = 'image $n';
+          final value = lesson[key];
+          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+            widgets.add(Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+            ));
+            matched = true;
+          }
         }
       }
       if (!matched) {
