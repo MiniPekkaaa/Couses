@@ -241,7 +241,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: forceLineBreaks(boldLineToHeader(course['Description'] ?? 'No description')),
+                    data: forceLineBreaks(normalizeMarkdown(boldLineToHeader(course['Description'] ?? 'No description'))),
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -376,7 +376,7 @@ class LessonDetailScreen extends StatelessWidget {
       if (text.isNotEmpty) {
         widgets.add(
           MarkdownBody(
-            data: forceLineBreaks(boldLineToHeader(text)),
+            data: forceLineBreaks(normalizeMarkdown(boldLineToHeader(text))),
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -474,7 +474,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: forceLineBreaks(boldLineToHeader(lesson['Description'] ?? '')),
+                  data: forceLineBreaks(normalizeMarkdown(boldLineToHeader(lesson['Description'] ?? ''))),
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
@@ -709,5 +709,24 @@ String boldLineToHeader(String text) {
       return '### $headerText';
     }
     return line;
+  }).join('\n');
+}
+
+String normalizeMarkdown(String text) {
+  final lines = text.split('\n');
+  return lines.map((line) {
+    String l = line.trim();
+    // Нормализуем заголовки: ###   текст  => ### текст
+    final headerMatch = RegExp(r'^(#{1,6})\s*(.*?)\s* -\u001f\u007f]*$').firstMatch(l);
+    if (headerMatch != null) {
+      final hashes = headerMatch.group(1)!;
+      final content = headerMatch.group(2)!.replaceAll(RegExp(r'\s+'), ' ').trim();
+      l = '$hashes $content';
+    }
+    // Нормализуем жирный текст: ** текст ** => **текст**
+    l = l.replaceAllMapped(RegExp(r'\*\*\s*(.*?)\s*\*\*'), (m) => '**${m[1]!.replaceAll(RegExp(r'\s+'), ' ').trim()}**');
+    // Нормализуем курсив: * текст * => *текст*
+    l = l.replaceAllMapped(RegExp(r'\*\s*(.*?)\s*\*'), (m) => '*${m[1]!.replaceAll(RegExp(r'\s+'), ' ').trim()}*');
+    return l;
   }).join('\n');
 }
