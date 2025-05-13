@@ -432,12 +432,18 @@ class LessonDetailScreen extends StatelessWidget {
         );
       }
     }
-    // Если ни одного видео не вставили, но есть video 1, вставляем его в конец
-    if (!videoInserted && lesson['video 1'] != null && lesson['video 1'] is List && lesson['video 1'].isNotEmpty && lesson['video 1'][0]['url'] != null) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.only(top: 24.0),
-        child: VideoPlayerWidget(videoUrl: lesson['video 1'][0]['url']),
-      ));
+    // Если ни одного видео не вставили, ищем первое доступное видео (video 1 ... video 6) и вставляем его в конец
+    if (!videoInserted) {
+      for (int i = 1; i <= 6; i++) {
+        final key = 'video $i';
+        if (lesson[key] != null && lesson[key] is List && lesson[key].isNotEmpty && lesson[key][0]['url'] != null) {
+          widgets.add(Padding(
+            padding: const EdgeInsets.only(top: 24.0),
+            child: VideoPlayerWidget(videoUrl: lesson[key][0]['url']),
+          ));
+          break;
+        }
+      }
     }
     return widgets;
   }
