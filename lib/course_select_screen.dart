@@ -422,6 +422,45 @@ class LessonDetailScreen extends StatelessWidget {
               ),
             const Divider(height: 32, thickness: 1),
             ..._parseRichContent(context, lesson['Content'] ?? '', lesson),
+            const SizedBox(height: 24),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: AirtableService.fetchLessons(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox.shrink();
+                }
+
+                final allLessons = snapshot.data!;
+                final currentCourseLessons = allLessons
+                    .where((l) => l['Course'] == lesson['Course'])
+                    .toList()
+                  ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+
+                final currentIndex = currentCourseLessons.indexWhere((l) => l['id'] == lesson['id']);
+                if (currentIndex == -1 || currentIndex >= currentCourseLessons.length - 1) {
+                  return const SizedBox.shrink();
+                }
+
+                final nextLesson = currentCourseLessons[currentIndex + 1];
+                return Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LessonDetailScreen(lesson: nextLesson),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_forward),
+                    label: Text('Перейти к уроку: ${nextLesson['Name']}'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
