@@ -241,7 +241,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: forceLineBreaks(course['Description'] ?? 'No description'),
+                    data: forceLineBreaks(boldLineToHeader(course['Description'] ?? 'No description')),
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -376,7 +376,7 @@ class LessonDetailScreen extends StatelessWidget {
       if (text.isNotEmpty) {
         widgets.add(
           MarkdownBody(
-            data: forceLineBreaks(text),
+            data: forceLineBreaks(boldLineToHeader(text)),
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -474,7 +474,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: forceLineBreaks(lesson['Description'] ?? ''),
+                  data: forceLineBreaks(boldLineToHeader(lesson['Description'] ?? '')),
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
@@ -696,3 +696,14 @@ class ModuleLessonsScreen extends StatelessWidget {
 }
 
 String forceLineBreaks(String text) => text.replaceAll('\n', '  \n');
+
+String boldLineToHeader(String text) {
+  final lines = text.split('\n');
+  return lines.map((line) {
+    final trimmed = line.trim();
+    if (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length > 4) {
+      return '### $trimmed';
+    }
+    return line;
+  }).join('\n');
+}
