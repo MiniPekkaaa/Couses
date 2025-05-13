@@ -494,28 +494,70 @@ class LessonDetailScreen extends StatelessWidget {
                   ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
 
                 final currentIndex = currentCourseLessons.indexWhere((l) => l['id'] == lesson['id']);
-                if (currentIndex == -1 || currentIndex >= currentCourseLessons.length - 1) {
+                if (currentIndex == -1) {
                   return const SizedBox.shrink();
                 }
 
-                final nextLesson = currentCourseLessons[currentIndex + 1];
-                return Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LessonDetailScreen(lesson: nextLesson),
+                // Проверяем, является ли этот урок последним в своём модуле
+                final module = lesson['Module'];
+                bool isLastInModule = false;
+                if (module != null && module.toString().trim().isNotEmpty) {
+                  final moduleLessons = currentCourseLessons.where((l) => l['Module'] == module).toList()
+                    ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+                  if (moduleLessons.isNotEmpty && moduleLessons.last['id'] == lesson['id']) {
+                    isLastInModule = true;
+                  }
+                }
+
+                // Если это последний урок модуля и после него идёт модуль — показываем кнопку перехода к следующему модулю
+                if (isLastInModule && currentIndex < currentCourseLessons.length - 1) {
+                  final next = currentCourseLessons[currentIndex + 1];
+                  final nextModule = next['Module'];
+                  if (nextModule != null && nextModule.toString().trim().isNotEmpty) {
+                    final nextModuleLessons = currentCourseLessons.where((l) => l['Module'] == nextModule).toList();
+                    return Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ModuleLessonsScreen(moduleName: nextModule, lessons: nextModuleLessons, allCourseLessons: currentCourseLessons),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.folder_special),
+                        label: Text('Перейти к модулю: $nextModule (${nextModuleLessons.length} уроков)'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.arrow_forward),
-                    label: Text('Перейти к уроку: ${nextLesson['Name'] ?? ''}'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                    );
+                  }
+                }
+
+                // Обычная логика перехода к следующему уроку
+                if (currentIndex < currentCourseLessons.length - 1) {
+                  final nextLesson = currentCourseLessons[currentIndex + 1];
+                  return Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LessonDetailScreen(lesson: nextLesson),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.arrow_forward),
+                      label: Text('Перейти к уроку: ${nextLesson['Name'] ?? ''}'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
+
+                return const SizedBox.shrink();
               },
             ),
           ],
