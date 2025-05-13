@@ -297,13 +297,13 @@ class CourseDetailScreen extends StatelessWidget {
                               Card(
                                 color: Colors.blue.shade50,
                                 child: ListTile(
-                                  title: Text('Перейти к модулю: $module', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  title: Text('Перейти к модулю: $module (${moduleLessons.length} уроков)', style: const TextStyle(fontWeight: FontWeight.bold)),
                                   trailing: const Icon(Icons.folder_special),
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons),
+                                        builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons, allCourseLessons: lessons),
                                       ),
                                     );
                                   },
@@ -529,8 +529,9 @@ class LessonDetailScreen extends StatelessWidget {
 class ModuleLessonsScreen extends StatelessWidget {
   final String moduleName;
   final List<Map<String, dynamic>> lessons;
+  final List<Map<String, dynamic>>? allCourseLessons; // все уроки курса (для поиска следующего модуля/урока)
 
-  const ModuleLessonsScreen({Key? key, required this.moduleName, required this.lessons}) : super(key: key);
+  const ModuleLessonsScreen({Key? key, required this.moduleName, required this.lessons, this.allCourseLessons}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -540,23 +541,86 @@ class ModuleLessonsScreen extends StatelessWidget {
         itemCount: lessons.length,
         itemBuilder: (context, index) {
           final lesson = lessons[index];
-          return Card(
-            child: ListTile(
-              title: Text(lesson['Name'] ?? ''),
-              subtitle: Text(lesson['Duration'] ?? ''),
-              trailing: const Icon(Icons.play_circle_outline),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LessonDetailScreen(lesson: lesson),
-                  ),
-                );
-              },
-            ),
+          final isLast = index == lessons.length - 1;
+          return Column(
+            children: [
+              Card(
+                child: ListTile(
+                  title: Text(lesson['Name'] ?? ''),
+                  subtitle: Text(lesson['Duration'] ?? ''),
+                  trailing: const Icon(Icons.play_circle_outline),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LessonDetailScreen(lesson: lesson),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (isLast && allCourseLessons != null)
+                _buildNextButton(context, lesson, allCourseLessons!),
+            ],
           );
         },
       ),
     );
+  }
+
+  Widget _buildNextButton(BuildContext context, Map<String, dynamic> lastLesson, List<Map<String, dynamic>> allLessons) {
+    // Найти следующий элемент после последнего урока модуля в общем списке курса
+    final sortedLessons = List<Map<String, dynamic>>.from(allLessons)
+      ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
+    final lastIndex = sortedLessons.indexWhere((l) => l['id'] == lastLesson['id']);
+    if (lastIndex == -1 || lastIndex >= sortedLessons.length - 1) return const SizedBox.shrink();
+    final next = sortedLessons[lastIndex + 1];
+    final nextModule = next['Module'];
+    if (nextModule != null && nextModule.toString().trim().isNotEmpty) {
+      // Переход к следующему модулю
+      final nextModuleLessons = sortedLessons.where((l) => l['Module'] == nextModule).toList();
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ModuleLessonsScreen(moduleName: nextModule, lessons: nextModuleLessons, allCourseLessons: allLessons),
+                ),
+              );
+            },
+            icon: const Icon(Icons.folder_special),
+            label: Text('Перейти к модулю: $nextModule (${nextModuleLessons.length} уроков)'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ),
+      );
+    } else {
+      // Переход к следующему одиночному уроку
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LessonDetailScreen(lesson: next),
+                ),
+              );
+            },
+            icon: const Icon(Icons.arrow_forward),
+            label: Text('Перейти к уроку: ${next['Name'] ?? ''}'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
