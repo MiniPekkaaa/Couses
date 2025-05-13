@@ -241,7 +241,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: course['Description'] ?? 'No description',
+                    data: forceLineBreaks(course['Description'] ?? 'No description'),
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -376,7 +376,7 @@ class LessonDetailScreen extends StatelessWidget {
       if (text.isNotEmpty) {
         widgets.add(
           MarkdownBody(
-            data: text,
+            data: forceLineBreaks(text),
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -474,7 +474,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: lesson['Description'] ?? '',
+                  data: forceLineBreaks(lesson['Description'] ?? ''),
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
@@ -694,3 +694,5 @@ class ModuleLessonsScreen extends StatelessWidget {
     }
   }
 }
+
+String forceLineBreaks(String text) => text.replaceAll('\n', '  \n');
