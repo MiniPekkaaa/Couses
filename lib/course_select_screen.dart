@@ -356,25 +356,6 @@ class LessonDetailScreen extends StatelessWidget {
 
   const LessonDetailScreen({Key? key, required this.lesson}) : super(key: key);
 
-  // Автоисправление markdown: убираем пробелы перед ** и __ и добавляем пустую строку между абзацами
-  String _fixMarkdownFormatting(String text) {
-    // Удаляем лишние пробелы перед/после ** и __
-    String fixed = text
-      .replaceAllMapped(RegExp(r'\s+(\*\*|__)'), (m) => m[1]!)
-      .replaceAllMapped(RegExp(r'(\*\*|__)\s+'), (m) => m[1]!);
-    // Добавляем пустую строку между абзацами, если её нет
-    List<String> lines = fixed.split('\n');
-    List<String> result = [];
-    for (int i = 0; i < lines.length; i++) {
-      result.add(lines[i]);
-      // Если текущая строка не пустая и следующая строка не пустая, вставляем пустую строку
-      if (lines[i].trim().isNotEmpty && i + 1 < lines.length && lines[i + 1].trim().isNotEmpty) {
-        result.add('');
-      }
-    }
-    return result.join('\n');
-  }
-
   List<Widget> _parseRichContent(BuildContext context, String content, Map<String, dynamic> lesson) {
     final List<Widget> widgets = [];
     final lines = content.split('\n');
@@ -419,7 +400,7 @@ class LessonDetailScreen extends StatelessWidget {
       if (!matched) {
         widgets.add(
           MarkdownBody(
-            data: _fixMarkdownFormatting(line),
+            data: AirtableService.fixAirtableMarkdown(line),
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -468,7 +449,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: _fixMarkdownFormatting(lesson['Description'] ?? ''),
+                  data: AirtableService.fixAirtableMarkdown(lesson['Description'] ?? ''),
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
