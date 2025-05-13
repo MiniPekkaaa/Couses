@@ -431,9 +431,21 @@ class LessonDetailScreen extends StatelessWidget {
                 }
 
                 final allLessons = snapshot.data!;
-                final currentCourseLessons = allLessons
-                    .where((l) => l['Course'] == lesson['Course'])
-                    .toList()
+                // Универсальная фильтрация по курсу
+                final currentCourseLessons = allLessons.where((l) {
+                  final courseField = l['Course'];
+                  final currentCourseField = lesson['Course'];
+                  if (courseField == null || currentCourseField == null) return false;
+                  if (courseField is List && currentCourseField is List) {
+                    return courseField.any((id) => currentCourseField.contains(id));
+                  } else if (courseField is List) {
+                    return courseField.contains(currentCourseField);
+                  } else if (currentCourseField is List) {
+                    return currentCourseField.contains(courseField);
+                  } else {
+                    return courseField == currentCourseField;
+                  }
+                }).toList()
                   ..sort((a, b) => (a['Order'] ?? 0).compareTo(b['Order'] ?? 0));
 
                 final currentIndex = currentCourseLessons.indexWhere((l) => l['id'] == lesson['id']);
@@ -453,7 +465,7 @@ class LessonDetailScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.arrow_forward),
-                    label: Text('Перейти к уроку: ${nextLesson['Name']}'),
+                    label: Text('Перейти к уроку: ${nextLesson['Name'] ?? ''}'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
