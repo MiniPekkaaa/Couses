@@ -283,13 +283,41 @@ class CourseDetailScreen extends StatelessWidget {
                       if (lessons.isEmpty) {
                         return const Text('Нет уроков');
                       }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: lessons.length,
-                        itemBuilder: (context, index) {
-                          final lesson = lessons[index];
-                          return Card(
+                      // Группировка по модулям
+                      final List<Widget> lessonWidgets = [];
+                      final Set<String> shownModules = {};
+                      for (int i = 0; i < lessons.length; i++) {
+                        final lesson = lessons[i];
+                        final module = lesson['Module'];
+                        if (module != null && module.toString().trim().isNotEmpty) {
+                          if (!shownModules.contains(module)) {
+                            // Собираем все уроки этого модуля
+                            final moduleLessons = lessons.where((l) => l['Module'] == module).toList();
+                            lessonWidgets.add(
+                              Card(
+                                color: Colors.blue.shade50,
+                                child: ListTile(
+                                  title: Text('Перейти к модулю: $module', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  trailing: const Icon(Icons.folder_special),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                            shownModules.add(module);
+                          }
+                          // Не добавляем сами уроки модуля в основной список
+                          continue;
+                        }
+                        // Урок без модуля — обычная карточка
+                        lessonWidgets.add(
+                          Card(
                             child: ListTile(
                               title: Text(lesson['Name'] ?? ''),
                               subtitle: Text(lesson['Duration'] ?? ''),
@@ -303,8 +331,13 @@ class CourseDetailScreen extends StatelessWidget {
                                 );
                               },
                             ),
-                          );
-                        },
+                          ),
+                        );
+                      }
+                      return ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: lessonWidgets,
                       );
                     },
                   ),
@@ -487,6 +520,42 @@ class LessonDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Новый экран для отображения уроков модуля
+class ModuleLessonsScreen extends StatelessWidget {
+  final String moduleName;
+  final List<Map<String, dynamic>> lessons;
+
+  const ModuleLessonsScreen({Key? key, required this.moduleName, required this.lessons}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(moduleName)),
+      body: ListView.builder(
+        itemCount: lessons.length,
+        itemBuilder: (context, index) {
+          final lesson = lessons[index];
+          return Card(
+            child: ListTile(
+              title: Text(lesson['Name'] ?? ''),
+              subtitle: Text(lesson['Duration'] ?? ''),
+              trailing: const Icon(Icons.play_circle_outline),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LessonDetailScreen(lesson: lesson),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
