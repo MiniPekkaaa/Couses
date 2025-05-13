@@ -241,7 +241,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: _fixMarkdownFormatting(course['Description'] ?? 'No description'),
+                    data: course['Description'] ?? 'No description',
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -351,25 +351,6 @@ class CourseDetailScreen extends StatelessWidget {
   }
 }
 
-// Автоисправление markdown: убираем пробелы перед ** и __ и добавляем пустую строку между абзацами
-String _fixMarkdownFormatting(String text) {
-  // Удаляем лишние пробелы перед/после ** и __
-  String fixed = text
-    .replaceAllMapped(RegExp(r'\s+(\*\*|__)'), (m) => m[1]!)
-    .replaceAllMapped(RegExp(r'(\*\*|__)\s+'), (m) => m[1]!);
-  // Добавляем пустую строку между абзацами, если её нет
-  List<String> lines = fixed.split('\n');
-  List<String> result = [];
-  for (int i = 0; i < lines.length; i++) {
-    result.add(lines[i]);
-    // Если текущая строка не пустая и следующая строка не пустая, вставляем пустую строку
-    if (lines[i].trim().isNotEmpty && i + 1 < lines.length && lines[i + 1].trim().isNotEmpty) {
-      result.add('');
-    }
-  }
-  return result.join('\n');
-}
-
 class LessonDetailScreen extends StatelessWidget {
   final Map<String, dynamic> lesson;
 
@@ -387,7 +368,7 @@ class LessonDetailScreen extends StatelessWidget {
       if (text.isNotEmpty) {
         widgets.add(
           MarkdownBody(
-            data: _fixMarkdownFormatting(text),
+            data: text,
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -477,7 +458,7 @@ class LessonDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: MarkdownBody(
-                  data: _fixMarkdownFormatting(lesson['Description'] ?? ''),
+                  data: lesson['Description'] ?? '',
                   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                     a: const TextStyle(color: Colors.blue),
                     code: const TextStyle(
