@@ -241,7 +241,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   MarkdownBody(
-                    data: course['Description'] ?? 'No description',
+                    data: _fixMarkdownFormatting(course['Description'] ?? 'No description'),
                     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                       a: const TextStyle(color: Colors.blue),
                       code: const TextStyle(
@@ -377,49 +377,17 @@ class LessonDetailScreen extends StatelessWidget {
 
   List<Widget> _parseRichContent(BuildContext context, String content, Map<String, dynamic> lesson) {
     final List<Widget> widgets = [];
-    final lines = content.split('\n');
-    bool videoInserted = false;
     final videoReg = RegExp(r'\{video (\d+)\}');
     final imageReg = RegExp(r'\{image (\d+)\}');
-    for (final line in lines) {
-      bool matched = false;
-      // Видео по {video n}
-      final videoMatch = videoReg.firstMatch(line.trim());
-      if (videoMatch != null) {
-        final n = int.tryParse(videoMatch.group(1)!);
-        if (n != null) {
-          final key = 'video $n';
-          final value = lesson[key];
-          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-            widgets.add(Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: VideoPlayerWidget(videoUrl: value[0]['url']),
-            ));
-            matched = true;
-            videoInserted = true;
-          }
-        }
-      }
-      // Картинки по {image n}
-      final imageMatch = imageReg.firstMatch(line.trim());
-      if (imageMatch != null) {
-        final n = int.tryParse(imageMatch.group(1)!);
-        if (n != null) {
-          final key = 'image $n';
-          final value = lesson[key];
-          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
-            widgets.add(Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
-            ));
-            matched = true;
-          }
-        }
-      }
-      if (!matched) {
+    StringBuffer markdownBuffer = StringBuffer();
+    bool videoInserted = false;
+
+    void flushMarkdown() {
+      final text = markdownBuffer.toString().trim();
+      if (text.isNotEmpty) {
         widgets.add(
           MarkdownBody(
-            data: _fixMarkdownFormatting(line),
+            data: _fixMarkdownFormatting(text),
             styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
               a: const TextStyle(color: Colors.blue),
               code: const TextStyle(
@@ -430,8 +398,49 @@ class LessonDetailScreen extends StatelessWidget {
             builders: {'a': LinkWithCopyButtonBuilder()},
           ),
         );
+        markdownBuffer.clear();
       }
     }
+
+    final lines = content.split('\n');
+    for (final line in lines) {
+      final trimmed = line.trim();
+      final videoMatch = videoReg.firstMatch(trimmed);
+      if (videoMatch != null) {
+        flushMarkdown();
+        final n = int.tryParse(videoMatch.group(1)!);
+        if (n != null) {
+          final key = 'video $n';
+          final value = lesson[key];
+          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+            widgets.add(Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: VideoPlayerWidget(videoUrl: value[0]['url']),
+            ));
+            videoInserted = true;
+          }
+        }
+        continue;
+      }
+      final imageMatch = imageReg.firstMatch(trimmed);
+      if (imageMatch != null) {
+        flushMarkdown();
+        final n = int.tryParse(imageMatch.group(1)!);
+        if (n != null) {
+          final key = 'image $n';
+          final value = lesson[key];
+          if (value != null && value is List && value.isNotEmpty && value[0]['url'] != null) {
+            widgets.add(Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Image.network(value[0]['url'], errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+            ));
+          }
+        }
+        continue;
+      }
+      markdownBuffer.writeln(line);
+    }
+    flushMarkdown();
     // Если ни одного видео не вставили, ищем первое доступное видео (video 1 ... video 6) и вставляем его в конец
     if (!videoInserted) {
       for (int i = 1; i <= 6; i++) {
