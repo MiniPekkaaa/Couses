@@ -701,11 +701,12 @@ String boldLineToHeader(String text) {
   final lines = text.split('\n');
   return lines.map((line) {
     final trimmed = line.trim();
-    // Убираем пробелы между текстом и звёздочками
-    final normalized = trimmed.replaceAll(' **', '**').replaceAll('** ', '**');
-    final boldMatch = RegExp(r'^\*\*(.+?)\*\*$').firstMatch(normalized);
-    if (boldMatch != null) {
-      return '### **${boldMatch.group(1)!.trim()}**';
+    // Ищем строку, которая начинается и заканчивается на **, допускаем пробелы/табы между **
+    final match = RegExp(r'^\*{2}\s*(.*?)\s*\*{2} 0-]*$').firstMatch(trimmed);
+    if (match != null) {
+      // Убираем все невидимые символы и пробелы вокруг текста внутри **
+      final headerText = match.group(1)!.replaceAll(RegExp(r'\s+'), ' ').trim();
+      return '### $headerText';
     }
     return line;
   }).join('\n');
