@@ -701,8 +701,11 @@ String boldLineToHeader(String text) {
   final lines = text.split('\n');
   return lines.map((line) {
     final trimmed = line.trim();
-    if (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length > 4) {
-      return '### $trimmed';
+    // Убираем пробелы между текстом и звёздочками
+    final normalized = trimmed.replaceAll(' **', '**').replaceAll('** ', '**');
+    final boldMatch = RegExp(r'^\*\*(.+?)\*\*$').firstMatch(normalized);
+    if (boldMatch != null) {
+      return '### **${boldMatch.group(1)!.trim()}**';
     }
     return line;
   }).join('\n');
