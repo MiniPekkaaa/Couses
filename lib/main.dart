@@ -3,7 +3,6 @@ import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
 import 'telegram_webapp_js.dart';
-import 'dart:convert';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,30 +72,6 @@ Future<bool> checkUserRegistered() async {
   }
 }
 
-Future<Map<String, dynamic>?> fetchUserData(String userId) async {
-  try {
-    final response = await html.HttpRequest.request(
-      '/api/get_user?user_id=$userId',
-      method: 'GET',
-    );
-    if (response.status == 200 && response.responseText != null) {
-      return jsonDecode(response.responseText!);
-    }
-  } catch (_) {}
-  return null;
-}
-
-Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
-  final userData = await fetchUserData(userId);
-  if (userData == null) return [];
-  final openCourses = (userData['Open courses'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
-  final allCourses = await AirtableService.fetchCourses();
-  return allCourses.where((course) {
-    final opening = course['Opening procedure']?.toString();
-    return opening != null && openCourses.contains(opening);
-  }).toList();
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -105,20 +80,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: FutureBuilder<String?>(
-        future: getTelegramUserId(),
-        builder: (context, userIdSnapshot) {
-          if (!userIdSnapshot.hasData || userIdSnapshot.data == null) {
+      home: FutureBuilder<bool>(
+        future: checkUserRegistered(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          if (!snapshot.data!) {
             return const NotRegisteredScreen();
           }
-          final userId = userIdSnapshot.data!;
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: fetchAvailableCourses(userId),
+            future: AirtableService.fetchCourses(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-              if (snapshot.data!.isEmpty) {
-                return const NotRegisteredScreen();
-              }
               return CourseSelectScreen(
                 title: 'Курсы',
                 itemsCollection: snapshot.data!,
