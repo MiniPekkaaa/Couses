@@ -456,6 +456,23 @@ class LessonDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Если есть ref_lesson, подгружаем нужный урок и отображаем его контент
+    if (lesson['ref_lesson'] != null && (lesson['ref_lesson'] as String).isNotEmpty) {
+      return FutureBuilder<List<Map<String, dynamic>>>(
+        future: AirtableService.fetchLessons(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          final allLessons = snapshot.data!;
+          final refLesson = allLessons.firstWhere(
+            (l) => l['id'] == lesson['ref_lesson'] || l['Name'] == lesson['ref_lesson'],
+            orElse: () => lesson,
+          );
+          return LessonDetailScreen(lesson: refLesson);
+        },
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson['Name'] ?? 'Урок'),
