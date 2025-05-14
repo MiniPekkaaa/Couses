@@ -51,6 +51,20 @@ class AirtableService {
         throw Exception('Ошибка загрузки уроков: \\${response.body}');
       }
     } while (offset != null);
+
+    // Подмена контента для уроков с ref_lesson
+    final lessonsById = {for (var l in allLessons) l['id']: l};
+    for (final lesson in allLessons) {
+      final refId = lesson['ref_lesson'];
+      if (refId != null && refId is String && refId.isNotEmpty && lessonsById.containsKey(refId)) {
+        final refLesson = lessonsById[refId]!;
+        for (final key in refLesson.keys) {
+          if (!['id', 'Name', 'Order', 'Module', 'Course', 'ref_lesson', 'ref_course'].contains(key)) {
+            lesson[key] = refLesson[key];
+          }
+        }
+      }
+    }
     return allLessons;
   }
 } 
