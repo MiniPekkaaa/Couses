@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
-import 'telegram_webapp_js.dart';
-import 'package:js/js.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
