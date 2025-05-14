@@ -112,17 +112,28 @@ class MyApp extends StatelessWidget {
             return const NotRegisteredScreen();
           }
           final userId = userIdSnapshot.data!;
-          return FutureBuilder<List<Map<String, dynamic>>>(
-            future: fetchAvailableCourses(userId),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-              if (snapshot.data!.isEmpty) {
+          return FutureBuilder<bool>(
+            future: checkUserRegistered(),
+            builder: (context, regSnapshot) {
+              if (!regSnapshot.hasData) {
+                return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              }
+              if (!regSnapshot.data!) {
                 return const NotRegisteredScreen();
               }
-              return CourseSelectScreen(
-                title: 'Курсы',
-                itemsCollection: snapshot.data!,
-                categoryField: 'categoryId',
+              // Пользователь зарегистрирован — грузим курсы
+              return FutureBuilder<List<Map<String, dynamic>>>(
+                future: fetchAvailableCourses(userId),
+                builder: (context, coursesSnapshot) {
+                  if (!coursesSnapshot.hasData) {
+                    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                  }
+                  return CourseSelectScreen(
+                    title: 'Курсы',
+                    itemsCollection: coursesSnapshot.data!,
+                    categoryField: 'categoryId',
+                  );
+                },
               );
             },
           );
