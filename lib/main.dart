@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
+import 'telegram_webapp_js.dart';
+import 'package:js/js.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,9 +54,18 @@ class NotAuthorizedScreen extends StatelessWidget {
 }
 
 Future<bool> checkUserRegistered() async {
-  // TODO: Реализовать получение user_id через JS interop для Telegram WebApp
-  // Сейчас всегда возвращает false для теста
-  return false;
+  try {
+    final user = initDataUnsafe != null ? initDataUnsafe['user'] : null;
+    final userId = user != null ? user['id']?.toString() : null;
+    if (userId == null) return false;
+    final response = await html.HttpRequest.request(
+      '/api/check_user?user_id=$userId',
+      method: 'GET',
+    );
+    return response.status == 200 && response.responseText == '1';
+  } catch (e) {
+    return false;
+  }
 }
 
 class MyApp extends StatelessWidget {
