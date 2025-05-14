@@ -11,6 +11,57 @@ void main() async {
   runApp(MyApp());
 }
 
+class NotRegisteredScreen extends StatelessWidget {
+  const NotRegisteredScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 32),
+            const Text(
+              'Вы не зарегистрирован',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                html.window.open('https://t.me/school_life_otto_bot?start=register', '_blank');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF5288c1),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Перейти к боту', style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<bool> checkUserRegistered() async {
+  try {
+    final userId = html.window.localStorage['tg_user_id'];
+    if (userId == null || userId.isEmpty) {
+      return false;
+    }
+    final response = await html.HttpRequest.request(
+      '/api/check_user?user_id=$userId',
+      method: 'GET',
+    );
+    return response.status == 200 && response.responseText == '1';
+  } catch (_) {
+    return false;
+  }
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -19,14 +70,25 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: FutureBuilder<List<Map<String, dynamic>>>(
-        future: AirtableService.fetchCourses(),
+      home: FutureBuilder<bool>(
+        future: checkUserRegistered(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          return CourseSelectScreen(
-            title: 'Курсы',
-            itemsCollection: snapshot.data!,
-            categoryField: 'categoryId',
+          if (!snapshot.hasData) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          if (!snapshot.data!) {
+            return const NotRegisteredScreen();
+          }
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: AirtableService.fetchCourses(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              return CourseSelectScreen(
+                title: 'Курсы',
+                itemsCollection: snapshot.data!,
+                categoryField: 'categoryId',
+              );
+            },
           );
         },
       ),
