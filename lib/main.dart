@@ -133,6 +133,21 @@ class MyApp extends StatelessWidget {
                   if (!coursesSnapshot.hasData) {
                     return const Scaffold(body: Center(child: CircularProgressIndicator()));
                   }
+                  // Если курсы не найдены, показываем уведомление с отладочной информацией
+                  if (coursesSnapshot.data!.isEmpty) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
+                      final userData = await fetchUserData(userId);
+                      final openCourses = (userData?['Open courses'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
+                      final allCourses = await AirtableService.fetchCourses();
+                      final allOpenings = allCourses.map((c) => c['Opening procedure']).toList();
+                      final msg = 'Нет доступных курсов!\nРазрешённые: $openCourses\nВ Airtable: $allOpenings';
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(msg, style: const TextStyle(fontSize: 14)), duration: const Duration(seconds: 8)),
+                        );
+                      }
+                    });
+                  }
                   return CourseSelectScreen(
                     title: 'Курсы',
                     itemsCollection: coursesSnapshot.data!,
