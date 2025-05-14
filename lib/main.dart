@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
+import 'telegram_webapp_js.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ class NotRegisteredScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 32),
             const Text(
-              'Вы не зарегистрирован',
+              'Вы не зарегистрированы в системе',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -37,7 +38,7 @@ class NotRegisteredScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Перейти к боту', style: TextStyle(fontSize: 16, color: Colors.white)),
+              child: const Text('Продолжить регистрацию в боте', style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
           ],
         ),
@@ -46,12 +47,21 @@ class NotRegisteredScreen extends StatelessWidget {
   }
 }
 
-Future<bool> checkUserRegistered() async {
+Future<String?> getTelegramUserId() async {
   try {
-    final userId = html.window.localStorage['tg_user_id'];
-    if (userId == null || userId.isEmpty) {
-      return false;
-    }
+    final user = initDataUnsafe.user;
+    return user?.id?.toString();
+  } catch (_) {
+    return null;
+  }
+}
+
+Future<bool> checkUserRegistered() async {
+  final userId = await getTelegramUserId();
+  if (userId == null || userId.isEmpty) {
+    return false;
+  }
+  try {
     final response = await html.HttpRequest.request(
       '/api/check_user?user_id=$userId',
       method: 'GET',
