@@ -140,7 +140,7 @@ class MyApp extends StatelessWidget {
                   }
                   final items = coursesSnapshot.data!;
                   if (items.isEmpty) {
-                    return const Scaffold(body: Center(child: Text('У вас пока нет курсов', style: TextStyle(fontSize: 18))));
+                    return const Scaffold(body: Center(child: Text('У вас пока нет доступных курсов', style: TextStyle(fontSize: 18))));
                   }
                   return CourseSelectScreen(
                     title: 'Курсы',
