@@ -92,16 +92,12 @@ Future<List<Map<String, dynamic>>> fetchAvailableCourses() async {
   final userId = await getTelegramUserId();
   if (userId == null) return [];
   final userData = await fetchUserData();
-  print('userData: ' + userData.toString());
   final openCoursesRaw = userData?['Open courses'];
-  print('openCoursesRaw: ' + openCoursesRaw.toString());
   final openCourses = openCoursesRaw != null
       ? openCoursesRaw.toString().split(',').map((e) => int.tryParse(e.trim())).where((e) => e != null).toList()
       : [];
-  print('openCourses: ' + openCourses.toString());
-  // Возвращаем специальный флаг, если openCourses пустой
   if (openCourses.isEmpty) {
-    return [{'__debug__': true, 'userData': userData, 'openCoursesRaw': openCoursesRaw}];
+    return [];
   }
   final allCourses = await AirtableService.fetchCourses();
   return allCourses.where((course) {
@@ -142,22 +138,13 @@ class MyApp extends StatelessWidget {
                   if (!coursesSnapshot.hasData) {
                     return const Scaffold(body: Center(child: CircularProgressIndicator()));
                   }
-                  // Если курсы не найдены, показываем уведомление с отладочной информацией
                   final items = coursesSnapshot.data!;
-                  if (items.isNotEmpty && items.first['__debug__'] == true) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      final msg = 'userData: ${items.first['userData']}\nopenCoursesRaw: ${items.first['openCoursesRaw']}';
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(msg, style: const TextStyle(fontSize: 14)), duration: const Duration(seconds: 8)),
-                        );
-                      }
-                    });
-                    return const Scaffold(body: Center(child: Text('Ошибка получения разрешённых курсов')));
+                  if (items.isEmpty) {
+                    return const Scaffold(body: Center(child: Text('У вас пока нет курсов', style: TextStyle(fontSize: 18))));
                   }
                   return CourseSelectScreen(
                     title: 'Курсы',
-                    itemsCollection: coursesSnapshot.data!,
+                    itemsCollection: items,
                     categoryField: 'categoryId',
                   );
                 },
