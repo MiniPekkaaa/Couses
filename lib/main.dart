@@ -55,15 +55,23 @@ class NotAuthorizedScreen extends StatelessWidget {
 
 Future<bool> checkUserRegistered() async {
   try {
+    // Получаем user_id из Telegram WebApp через JS interop
     final user = initDataUnsafe != null ? initDataUnsafe['user'] : null;
-    final userId = user != null ? user['id']?.toString() : null;
-    if (userId == null) return false;
+    final userId = user != null && user['id'] != null ? user['id'].toString() : null;
+
+    // Если не удалось получить user_id — считаем, что пользователь не авторизован
+    if (userId == null || userId.isEmpty) {
+      return false;
+    }
+
+    // Проверяем регистрацию через API Redis
     final response = await html.HttpRequest.request(
       '/api/check_user?user_id=$userId',
       method: 'GET',
     );
     return response.status == 200 && response.responseText == '1';
-  } catch (e) {
+  } catch (_) {
+    // Любая ошибка — считаем, что пользователь не авторизован
     return false;
   }
 }
