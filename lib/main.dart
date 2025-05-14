@@ -92,8 +92,8 @@ Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
   final openCourses = (userData['Open courses'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
   final allCourses = await AirtableService.fetchCourses();
   return allCourses.where((course) {
-    final opening = course['Opening procedure']?.toString();
-    return opening != null && openCourses.contains(opening);
+    final opening = course['Opening procedure'];
+    return opening != null && openCourses.contains(opening.toString());
   }).toList();
 }
 
