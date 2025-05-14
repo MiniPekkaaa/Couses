@@ -73,7 +73,9 @@ Future<bool> checkUserRegistered() async {
   }
 }
 
-Future<Map<String, dynamic>?> fetchUserData(String userId) async {
+Future<Map<String, dynamic>?> fetchUserData() async {
+  final userId = await getTelegramUserId();
+  if (userId == null || userId.isEmpty) return null;
   try {
     final response = await html.HttpRequest.request(
       '/api/get_user?user_id=$userId',
@@ -86,8 +88,10 @@ Future<Map<String, dynamic>?> fetchUserData(String userId) async {
   return null;
 }
 
-Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
-  final userData = await fetchUserData(userId);
+Future<List<Map<String, dynamic>>> fetchAvailableCourses() async {
+  final userId = await getTelegramUserId();
+  if (userId == null) return [];
+  final userData = await fetchUserData();
   print('userData: ' + userData.toString());
   final openCoursesRaw = userData?['Open courses'];
   print('openCoursesRaw: ' + openCoursesRaw.toString());
@@ -133,7 +137,7 @@ class MyApp extends StatelessWidget {
               }
               // Пользователь зарегистрирован — грузим курсы
               return FutureBuilder<List<Map<String, dynamic>>>(
-                future: fetchAvailableCourses(userId),
+                future: fetchAvailableCourses(),
                 builder: (context, coursesSnapshot) {
                   if (!coursesSnapshot.hasData) {
                     return const Scaffold(body: Center(child: CircularProgressIndicator()));
