@@ -95,16 +95,9 @@ Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
       ? openCoursesRaw.toString().split(',').map((e) => int.tryParse(e.trim())).where((e) => e != null).toList()
       : [];
   print('openCourses: ' + openCourses.toString());
+  // Возвращаем специальный флаг, если openCourses пустой
   if (openCourses.isEmpty) {
-    // Показываем SnackBar с отладкой, если context доступен
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = navigatorKey.currentContext;
-      if (ctx != null && ctx.mounted) {
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('userData: $userData\nopenCoursesRaw: $openCoursesRaw', style: const TextStyle(fontSize: 14)), duration: const Duration(seconds: 8)),
-        );
-      }
-    });
+    return [{'__debug__': true, 'userData': userData, 'openCoursesRaw': openCoursesRaw}];
   }
   final allCourses = await AirtableService.fetchCourses();
   return allCourses.where((course) {
@@ -146,19 +139,17 @@ class MyApp extends StatelessWidget {
                     return const Scaffold(body: Center(child: CircularProgressIndicator()));
                   }
                   // Если курсы не найдены, показываем уведомление с отладочной информацией
-                  if (coursesSnapshot.data!.isEmpty) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) async {
-                      final userData = await fetchUserData(userId);
-                      final openCourses = (userData?['Open courses'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
-                      final allCourses = await AirtableService.fetchCourses();
-                      final allOpenings = allCourses.map((c) => c['Opening procedure']).toList();
-                      final msg = 'Нет доступных курсов!\nРазрешённые: $openCourses\nВ Airtable: $allOpenings';
+                  final items = coursesSnapshot.data!;
+                  if (items.isNotEmpty && items.first['__debug__'] == true) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      final msg = 'userData: ${items.first['userData']}\nopenCoursesRaw: ${items.first['openCoursesRaw']}';
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(msg, style: const TextStyle(fontSize: 14)), duration: const Duration(seconds: 8)),
                         );
                       }
                     });
+                    return const Scaffold(body: Center(child: Text('Ошибка получения разрешённых курсов')));
                   }
                   return CourseSelectScreen(
                     title: 'Курсы',
