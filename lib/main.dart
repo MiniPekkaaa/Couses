@@ -88,12 +88,24 @@ Future<Map<String, dynamic>?> fetchUserData(String userId) async {
 
 Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
   final userData = await fetchUserData(userId);
-  if (userData == null) return [];
-  final openCourses = (userData['Open courses'] as String?)
-      ?.split(',')
-      .map((e) => int.tryParse(e.trim()))
-      .where((e) => e != null)
-      .toList() ?? [];
+  print('userData: ' + userData.toString());
+  final openCoursesRaw = userData?['Open courses'];
+  print('openCoursesRaw: ' + openCoursesRaw.toString());
+  final openCourses = openCoursesRaw != null
+      ? openCoursesRaw.toString().split(',').map((e) => int.tryParse(e.trim())).where((e) => e != null).toList()
+      : [];
+  print('openCourses: ' + openCourses.toString());
+  if (openCourses.isEmpty) {
+    // Показываем SnackBar с отладкой, если context доступен
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = navigatorKey.currentContext;
+      if (ctx != null && ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('userData: $userData\nopenCoursesRaw: $openCoursesRaw', style: const TextStyle(fontSize: 14)), duration: const Duration(seconds: 8)),
+        );
+      }
+    });
+  }
   final allCourses = await AirtableService.fetchCourses();
   return allCourses.where((course) {
     final opening = course['Opening procedure'];
