@@ -78,25 +78,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: FutureBuilder<bool>(
-        future: checkUserRegistered(),
+      home: FutureBuilder<List<Map<String, dynamic>>>(
+        future: AirtableService.fetchCourses(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-          if (!snapshot.data!) {
-            return const NotAuthorizedScreen(botLink: 'https://t.me/school_life_otto_bot?start=register');
-          }
-          return FutureBuilder<List<Map<String, dynamic>>>(
-            future: AirtableService.fetchCourses(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-              return CourseSelectScreen(
-                title: 'Курсы',
-                itemsCollection: snapshot.data!,
-                categoryField: 'categoryId',
-              );
-            },
+          if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return CourseSelectScreen(
+            title: 'Курсы',
+            itemsCollection: snapshot.data!,
+            categoryField: 'categoryId',
           );
         },
       ),
