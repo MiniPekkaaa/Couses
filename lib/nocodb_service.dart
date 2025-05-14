@@ -55,7 +55,11 @@ class AirtableService {
     // Подмена контента для уроков с ref_lesson
     final lessonsById = {for (var l in allLessons) l['id']: l};
     for (final lesson in allLessons) {
-      final refId = lesson['ref_lesson'];
+      var refId = lesson['ref_lesson'];
+      // Если ref_lesson — список, берём первый элемент
+      if (refId is List && refId.isNotEmpty) {
+        refId = refId.first;
+      }
       if (refId != null && refId is String && refId.isNotEmpty && lessonsById.containsKey(refId)) {
         final refLesson = lessonsById[refId]!;
         for (final key in refLesson.keys) {
