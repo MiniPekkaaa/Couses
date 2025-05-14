@@ -89,11 +89,16 @@ Future<Map<String, dynamic>?> fetchUserData(String userId) async {
 Future<List<Map<String, dynamic>>> fetchAvailableCourses(String userId) async {
   final userData = await fetchUserData(userId);
   if (userData == null) return [];
-  final openCourses = (userData['Open courses'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
+  final openCourses = (userData['Open courses'] as String?)
+      ?.split(',')
+      .map((e) => int.tryParse(e.trim()))
+      .where((e) => e != null)
+      .toList() ?? [];
   final allCourses = await AirtableService.fetchCourses();
   return allCourses.where((course) {
     final opening = course['Opening procedure'];
-    return opening != null && openCourses.contains(opening.toString());
+    final openingInt = opening is int ? opening : int.tryParse(opening.toString());
+    return openingInt != null && openCourses.contains(openingInt);
   }).toList();
 }
 
