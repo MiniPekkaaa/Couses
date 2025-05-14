@@ -28,7 +28,7 @@ class NotAuthorizedScreen extends StatelessWidget {
               const SizedBox(height: 32),
               Text(
                 'Вы не зарегистрированы в системе',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -52,21 +52,9 @@ class NotAuthorizedScreen extends StatelessWidget {
 }
 
 Future<bool> checkUserRegistered() async {
-  // Получаем user_id из Telegram WebApp (через JS interop)
-  try {
-    final tg = html.window['Telegram']?['WebApp'];
-    final user = tg != null ? tg['initDataUnsafe']?['user'] : null;
-    final userId = user != null ? user['id']?.toString() : null;
-    if (userId == null) return false;
-    // Проверяем регистрацию через API Redis (замените на свой endpoint)
-    final response = await html.HttpRequest.request(
-      '/api/check_user?user_id=$userId',
-      method: 'GET',
-    );
-    return response.status == 200 && response.responseText == '1';
-  } catch (e) {
-    return false;
-  }
+  // TODO: Реализовать получение user_id через JS interop для Telegram WebApp
+  // Сейчас всегда возвращает false для теста
+  return false;
 }
 
 class MyApp extends StatelessWidget {
