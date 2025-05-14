@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AirtableService {
-  static const String apiKey = 'patjbZurod2EX97nU.c63a5194242fb65ddc7eaa406a1be34e020596b9defb130953f75b3b3daf2e62';
-  static const String baseId = 'appepjeg5qmyfe7sf';
+  static const String apiKey = 'patq5ywPJxQqb6vwO.055b2880a61849952eb97974ab7e2fbae1c0df784c9018a47c649abe8617f6d9';
+  static const String baseId = 'app7ZglZBGw4lhR0a';
   static const String coursesTable = 'tblkJW1h5dLTW6dwJ';
-  static const String lessonsTable = 'tblE4Nb1q3vvzT1eX'; // Укажите id таблицы Lessons, если есть
+  static const String lessonsTable = 'tblE4Nb1q3vvzT1eX'; // id таблицы Lessons
 
   static Future<List<Map<String, dynamic>>> fetchCourses() async {
     final url = 'https://api.airtable.com/v0/$baseId/$coursesTable';
