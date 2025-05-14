@@ -117,7 +117,7 @@ class LMSMyCoursesScreen extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             title: Text(course['Course Title'] ?? 'Untitled'),
-            subtitle: Text(course['Instructor'] ?? 'Unknown Instructor'),
+            subtitle: Text(course['author'] ?? 'Unknown Author'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               // Навигация к деталям курса

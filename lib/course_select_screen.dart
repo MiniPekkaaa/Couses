@@ -181,7 +181,7 @@ class CourseSelectScreen extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         title: Text(course['Name'] ?? 'Untitled'),
-        subtitle: Text(course['Instructor'] ?? 'Unknown Instructor'),
+        subtitle: Text(course['author'] ?? 'Unknown Author'),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.push(
@@ -233,7 +233,7 @@ class CourseDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Инструктор: ${course['Instructor'] ?? 'Unknown'}',
+                    'Автор: ${course['author'] ?? 'Unknown'}',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
