@@ -32,12 +32,20 @@ def check_user():
 @app.route('/api/get_user')
 def get_user():
     user_id = request.args.get('user_id')
+    print(f'[get_user] user_id={user_id}')  # Логируем user_id
     if not user_id:
+        print('[get_user] Нет user_id в запросе')
         return jsonify({'error': 'user_id required'}), 400
+
     key = f'sc-life:user:{user_id}'
+    print(f'[get_user] Ищу ключ: {key}')  # Логируем ключ
+
     if redis_client.exists(key):
-        return jsonify(redis_client.hgetall(key)), 200
+        data = redis_client.hgetall(key)
+        print(f'[get_user] Данные из Redis: {data}')  # Логируем результат
+        return jsonify(data), 200
     else:
+        print(f'[get_user] Ключ не найден: {key}')
         return jsonify({'error': 'not found'}), 404
 
 if __name__ == '__main__':
