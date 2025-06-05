@@ -181,7 +181,9 @@ class CourseSelectScreen extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         title: Text(course['Name'] ?? 'Untitled'),
-        subtitle: Text(course['author'] ?? ''),
+        subtitle: course['author'] != null && course['author'].toString().isNotEmpty 
+            ? Text(course['author']) 
+            : null,
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.push(
@@ -224,11 +226,14 @@ class CourseDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    course['Name'] ?? 'Untitled',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
+                  Center(
+                    child: Text(
+                      course['Name'] ?? 'Untitled',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   const SizedBox(height: 8),
