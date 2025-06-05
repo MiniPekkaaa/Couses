@@ -171,28 +171,36 @@ class CourseSelectScreen extends StatelessWidget {
   Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: Image.network(
-          course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
-              ? course['Image'][0]['url']
-              : 'https://via.placeholder.com/50',
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 80),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: Image.network(
+            course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
+                ? course['Image'][0]['url']
+                : 'https://via.placeholder.com/50',
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
+          title: Text(
+            course['Name'] ?? 'Untitled',
+            overflow: TextOverflow.visible,
+            maxLines: null,
+          ),
+          subtitle: course['author'] != null && course['author'].toString().isNotEmpty 
+              ? Text(course['author']) 
+              : null,
+          trailing: const Icon(Icons.arrow_forward_ios),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CourseDetailScreen(course: course),
+              ),
+            );
+          },
         ),
-        title: Text(course['Name'] ?? 'Untitled'),
-        subtitle: course['author'] != null && course['author'].toString().isNotEmpty 
-            ? Text(course['author']) 
-            : null,
-        trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CourseDetailScreen(course: course),
-            ),
-          );
-        },
       ),
     );
   }
@@ -310,17 +318,26 @@ class CourseDetailScreen extends StatelessWidget {
                             lessonWidgets.add(
                               Card(
                                 color: Colors.blue.shade50,
-                                child: ListTile(
-                                  title: Text('Перейти к модулю: $module (${moduleLessons.length} уроков)', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  trailing: const Icon(Icons.folder_special),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons, allCourseLessons: lessons),
-                                      ),
-                                    );
-                                  },
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(minHeight: 80),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    title: Text(
+                                      'Перейти к модулю: $module (${moduleLessons.length} уроков)', 
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.visible,
+                                      maxLines: null,
+                                    ),
+                                    trailing: const Icon(Icons.folder_special),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons, allCourseLessons: lessons),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             );
@@ -332,18 +349,26 @@ class CourseDetailScreen extends StatelessWidget {
                         // Урок без модуля — обычная карточка
                         lessonWidgets.add(
                           Card(
-                            child: ListTile(
-                              title: Text(lesson['Name'] ?? ''),
-                              subtitle: Text(lesson['Duration'] ?? ''),
-                              trailing: const Icon(Icons.play_circle_outline),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LessonDetailScreen(lesson: lesson),
-                                  ),
-                                );
-                              },
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 80),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                title: Text(
+                                  lesson['Name'] ?? '',
+                                  overflow: TextOverflow.visible,
+                                  maxLines: null,
+                                ),
+                                subtitle: Text(lesson['Duration'] ?? ''),
+                                trailing: const Icon(Icons.play_circle_outline),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LessonDetailScreen(lesson: lesson),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         );
@@ -621,18 +646,26 @@ class ModuleLessonsScreen extends StatelessWidget {
           return Column(
             children: [
               Card(
-                child: ListTile(
-                  title: Text(lesson['Name'] ?? ''),
-                  subtitle: Text(lesson['Duration'] ?? ''),
-                  trailing: const Icon(Icons.play_circle_outline),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LessonDetailScreen(lesson: lesson),
-                      ),
-                    );
-                  },
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 80),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    title: Text(
+                      lesson['Name'] ?? '',
+                      overflow: TextOverflow.visible,
+                      maxLines: null,
+                    ),
+                    subtitle: Text(lesson['Duration'] ?? ''),
+                    trailing: const Icon(Icons.play_circle_outline),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LessonDetailScreen(lesson: lesson),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
               if (isLast && allCourseLessons != null)
