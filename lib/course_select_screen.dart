@@ -181,7 +181,7 @@ class CourseSelectScreen extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         title: Text(course['Name'] ?? 'Untitled'),
-        subtitle: Text(course['author'] ?? 'Unknown Author'),
+        subtitle: Text(course['author'] ?? ''),
         trailing: const Icon(Icons.arrow_forward_ios),
         onTap: () {
           Navigator.push(
@@ -232,13 +232,14 @@ class CourseDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Автор: ${course['author'] ?? 'Unknown'}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
+                  if (course['author'] != null && course['author'].toString().isNotEmpty)
+                    Text(
+                      'Автор: ${course['author']}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 16),
                   MarkdownBody(
                     data: forceLineBreaks(normalizeMarkdown(boldLineToHeader(course['Description'] ?? 'No description'))),
