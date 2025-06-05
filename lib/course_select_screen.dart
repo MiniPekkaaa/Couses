@@ -173,33 +173,47 @@ class CourseSelectScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 80),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Image.network(
-            course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
-                ? course['Image'][0]['url']
-                : 'https://via.placeholder.com/50',
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
-          title: Text(
-            course['Name'] ?? 'Untitled',
-            overflow: TextOverflow.visible,
-            maxLines: null,
-          ),
-          subtitle: course['author'] != null && course['author'].toString().isNotEmpty 
-              ? Text(course['author']) 
-              : null,
-          trailing: const Icon(Icons.arrow_forward_ios),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CourseDetailScreen(course: course),
+        child: IntrinsicHeight(
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            minVerticalPadding: 16,
+            leading: Container(
+              height: double.infinity,
+              alignment: Alignment.center,
+              child: Image.network(
+                course['Image'] != null && course['Image'] is List && course['Image'].isNotEmpty
+                    ? course['Image'][0]['url']
+                    : 'https://via.placeholder.com/50',
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
               ),
-            );
-          },
+            ),
+            title: Container(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                course['Name'] ?? 'Untitled',
+                overflow: TextOverflow.visible,
+                maxLines: null,
+              ),
+            ),
+            subtitle: course['author'] != null && course['author'].toString().isNotEmpty 
+                ? Text(course['author']) 
+                : null,
+            trailing: Container(
+              height: double.infinity,
+              alignment: Alignment.center,
+              child: const Icon(Icons.arrow_forward_ios),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseDetailScreen(course: course),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -320,23 +334,33 @@ class CourseDetailScreen extends StatelessWidget {
                                 color: Colors.blue.shade50,
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(minHeight: 80),
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    title: Text(
-                                      'Перейти к модулю: $module (${moduleLessons.length} уроков)', 
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.visible,
-                                      maxLines: null,
-                                    ),
-                                    trailing: const Icon(Icons.folder_special),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons, allCourseLessons: lessons),
+                                  child: IntrinsicHeight(
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      minVerticalPadding: 16,
+                                      title: Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          'Перейти к модулю: $module (${moduleLessons.length} уроков)', 
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          overflow: TextOverflow.visible,
+                                          maxLines: null,
                                         ),
-                                      );
-                                    },
+                                      ),
+                                      trailing: Container(
+                                        height: double.infinity,
+                                        alignment: Alignment.center,
+                                        child: const Icon(Icons.folder_special),
+                                      ),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ModuleLessonsScreen(moduleName: module, lessons: moduleLessons, allCourseLessons: lessons),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
@@ -351,23 +375,33 @@ class CourseDetailScreen extends StatelessWidget {
                           Card(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(minHeight: 80),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                title: Text(
-                                  lesson['Name'] ?? '',
-                                  overflow: TextOverflow.visible,
-                                  maxLines: null,
-                                ),
-                                subtitle: Text(lesson['Duration'] ?? ''),
-                                trailing: const Icon(Icons.play_circle_outline),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LessonDetailScreen(lesson: lesson),
+                              child: IntrinsicHeight(
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  minVerticalPadding: 16,
+                                  title: Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      lesson['Name'] ?? '',
+                                      overflow: TextOverflow.visible,
+                                      maxLines: null,
                                     ),
-                                  );
-                                },
+                                  ),
+                                  subtitle: Text(lesson['Duration'] ?? ''),
+                                  trailing: Container(
+                                    height: double.infinity,
+                                    alignment: Alignment.center,
+                                    child: const Icon(Icons.play_circle_outline),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LessonDetailScreen(lesson: lesson),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -648,23 +682,33 @@ class ModuleLessonsScreen extends StatelessWidget {
               Card(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 80),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    title: Text(
-                      lesson['Name'] ?? '',
-                      overflow: TextOverflow.visible,
-                      maxLines: null,
-                    ),
-                    subtitle: Text(lesson['Duration'] ?? ''),
-                    trailing: const Icon(Icons.play_circle_outline),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LessonDetailScreen(lesson: lesson),
+                  child: IntrinsicHeight(
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      minVerticalPadding: 16,
+                      title: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          lesson['Name'] ?? '',
+                          overflow: TextOverflow.visible,
+                          maxLines: null,
                         ),
-                      );
-                    },
+                      ),
+                      subtitle: Text(lesson['Duration'] ?? ''),
+                      trailing: Container(
+                        height: double.infinity,
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.play_circle_outline),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LessonDetailScreen(lesson: lesson),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
