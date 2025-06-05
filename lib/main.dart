@@ -32,7 +32,7 @@ class NotRegisteredScreen extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                html.window.open('https://t.me/school_life_otto_bot?start=register', '_blank');
+                html.window.open('https://t.me/SvetlanaGyataAi_bot?start=register', '_blank');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF5288c1),
