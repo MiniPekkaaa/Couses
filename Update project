@@ -1,0 +1,20 @@
+1. cd school-life-app
+2. git reset --hard
+3. gip pull orogin main
+4. flutter build web
+5.cp -r build/web/* /var/www/school_life__usr/data/www/school-life-app.stage.3r.agency/
+6. sudo systemctl restart nginx
+
+
+Если что-то не работает
+1. Выполните полную сборку с очисткой кеша 
+   flutter clean
+   flutter pub get
+   flutter build web --release
+
+2. При копировании на сервер, сначала удалите старые файлы
+   rm -rf /var/www/school_life__usr/data/www/school-life-app.stage.3r.agency/*
+   cp -r build/web/* /var/www/school_life__usr/data/www/school-life-app.stage.3r.agency/
+
+3. Перезапустите Nginx полностью
+   sudo systemctl restart nginx
