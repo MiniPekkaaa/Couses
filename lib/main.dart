@@ -100,11 +100,22 @@ Future<List<Map<String, dynamic>>> fetchAvailableCourses() async {
     return [];
   }
   final allCourses = await AirtableService.fetchCourses();
-  return allCourses.where((course) {
+  final availableCourses = allCourses.where((course) {
     final opening = course['Opening procedure'];
     final openingInt = opening is int ? opening : int.tryParse(opening.toString());
     return openingInt != null && openCourses.contains(openingInt);
   }).toList();
+  
+  // Сортируем курсы по полю "Opening procedure"
+  availableCourses.sort((a, b) {
+    final aOpening = a['Opening procedure'];
+    final bOpening = b['Opening procedure'];
+    final aInt = aOpening is int ? aOpening : int.tryParse(aOpening.toString()) ?? 0;
+    final bInt = bOpening is int ? bOpening : int.tryParse(bOpening.toString()) ?? 0;
+    return aInt.compareTo(bInt);
+  });
+  
+  return availableCourses;
 }
 
 class MyApp extends StatelessWidget {
