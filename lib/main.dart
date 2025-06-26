@@ -50,8 +50,27 @@ class NotRegisteredScreen extends StatelessWidget {
 
 Future<String?> getTelegramUserId() async {
   try {
+    // Способ 1: через initDataUnsafe (работает для Inline Keyboard)
     final user = initDataUnsafe.user;
-    return user?.id?.toString();
+    if (user?.id != null) {
+      return user.id.toString();
+    }
+    
+    // Способ 2: через webApp.initData (для Reply Keyboard)
+    final initData = webApp.initData;
+    if (initData.isNotEmpty) {
+      final params = Uri.parse('?$initData').queryParameters;
+      final userJson = params['user'];
+      if (userJson != null) {
+        final userData = jsonDecode(userJson);
+        final userId = userData['id'];
+        if (userId != null) {
+          return userId.toString();
+        }
+      }
+    }
+    
+    return null;
   } catch (_) {
     return null;
   }
