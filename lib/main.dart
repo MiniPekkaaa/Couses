@@ -86,19 +86,57 @@ Future<String?> getTelegramUserId() async {
       print('❌ Ошибка webApp.initData: $e');
     }
     
-    // Способ 3: через URL параметры (для Reply Keyboard)
+    // Способ 3: через Chat ID (для Reply Keyboard в приватных чатах)
+    try {
+      final chat = webApp.chat;
+      print('💬 webApp.chat: $chat');
+      
+      if (chat != null && chat.type == 'private') {
+        final chatId = chat.id.toString();
+        print('✅ Chat ID (= User ID для приватного чата): $chatId');
+        return chatId;
+      }
+    } catch (e) {
+      print('❌ Ошибка webApp.chat: $e');
+    }
+    
+    // Способ 4: через URL параметры (для Reply Keyboard)
     final currentUrl = html.window.location.href;
     final uri = Uri.parse(currentUrl);
     print('🌐 Текущий URL: $currentUrl');
     print('🌐 URI параметры: ${uri.queryParameters}');
     
-    // Проверяем user_id в URL параметрах
     final userIdFromUrl = uri.queryParameters['user_id'];
     print('🌐 user_id из URL: "$userIdFromUrl"');
     
     if (userIdFromUrl != null && userIdFromUrl.isNotEmpty) {
       print('✅ User ID через URL: $userIdFromUrl');
       return userIdFromUrl;
+    }
+    
+    // Способ 5: через JS API напрямую
+    try {
+      final telegramObj = js.context['Telegram'];
+      if (telegramObj != null) {
+        final webAppObj = telegramObj['WebApp'];
+        if (webAppObj != null) {
+          final chatObj = webAppObj['chat'];
+          print('🔧 JS chat object: $chatObj');
+          
+          if (chatObj != null) {
+            final chatId = chatObj['id'];
+            final chatType = chatObj['type'];
+            print('🔧 Chat ID: $chatId, Type: $chatType');
+            
+            if (chatType == 'private' && chatId != null) {
+              print('✅ User ID через JS API: $chatId');
+              return chatId.toString();
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('❌ Ошибка JS API: $e');
     }
     
     print('❌ User ID не найден ни одним из способов');

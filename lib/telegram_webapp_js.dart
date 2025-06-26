@@ -19,10 +19,20 @@ external TelegramWebApp get webApp;
 class TelegramWebApp {
   external TelegramInitData get initDataUnsafe;
   external String get initData;
+  external TelegramWebAppChat? get chat;
+  external String get version;
+}
+
+@JS()
+@anonymous
+class TelegramWebAppChat {
+  external int get id;
+  external String get type;
 }
 
 @JS()
 @anonymous
 class TelegramInitData {
   external TelegramWebAppUser? get user;
+  external TelegramWebAppChat? get chat;
 } 
