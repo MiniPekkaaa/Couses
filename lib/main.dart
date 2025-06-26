@@ -71,29 +71,14 @@ Future<String?> getTelegramUserId() async {
       }
     }
     
-    // Способ 3: через URL параметры (для случая с start_param)
+    // Способ 3: через URL параметры (для Reply Keyboard)
     final currentUrl = html.window.location.href;
     final uri = Uri.parse(currentUrl);
-    final startParam = uri.queryParameters['start_param'];
     
-    if (startParam == 'reply_keyboard') {
-      // Если это Reply Keyboard, попробуем альтернативные способы
-      try {
-        final webAppData = js.context['Telegram']['WebApp'];
-        final initDataStr = webAppData['initData'];
-        
-        if (initDataStr != null && initDataStr.toString().isNotEmpty) {
-          final params = Uri.parse('?${initDataStr.toString()}').queryParameters;
-          final userJson = params['user'];
-          if (userJson != null) {
-            final userData = jsonDecode(userJson);
-            final userId = userData['id'];
-            if (userId != null) {
-              return userId.toString();
-            }
-          }
-        }
-      } catch (_) {}
+    // Проверяем user_id в URL параметрах
+    final userIdFromUrl = uri.queryParameters['user_id'];
+    if (userIdFromUrl != null && userIdFromUrl.isNotEmpty) {
+      return userIdFromUrl;
     }
     
     return null;
