@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
-import 'dart:js' as js;
 import 'telegram_webapp_js.dart';
 import 'dart:convert';
 
@@ -51,98 +50,9 @@ class NotRegisteredScreen extends StatelessWidget {
 
 Future<String?> getTelegramUserId() async {
   try {
-    print('🔍 === ОТЛАДКА ПОЛУЧЕНИЯ USER ID ===');
-    
-    // Способ 1: через initDataUnsafe (работает для Inline Keyboard)
-    try {
-      final user = initDataUnsafe.user;
-      print('📱 initDataUnsafe.user: $user');
-      if (user?.id != null) {
-        print('✅ User ID через initDataUnsafe: ${user!.id}');
-        return user.id.toString();
-      }
-    } catch (e) {
-      print('❌ Ошибка initDataUnsafe: $e');
-    }
-    
-    // Способ 2: через webApp.initData (для Reply Keyboard)
-    try {
-      final initData = webApp.initData;
-      print('📱 webApp.initData: "$initData"');
-      if (initData.isNotEmpty) {
-        final params = Uri.parse('?$initData').queryParameters;
-        print('📱 Parsed params: $params');
-        final userJson = params['user'];
-        if (userJson != null) {
-          final userData = jsonDecode(userJson);
-          final userId = userData['id'];
-          if (userId != null) {
-            print('✅ User ID через webApp.initData: $userId');
-            return userId.toString();
-          }
-        }
-      }
-    } catch (e) {
-      print('❌ Ошибка webApp.initData: $e');
-    }
-    
-    // Способ 3: через Chat ID (для Reply Keyboard в приватных чатах)
-    try {
-      final chat = webApp.chat;
-      print('💬 webApp.chat: $chat');
-      
-      if (chat != null && chat.type == 'private') {
-        final chatId = chat.id.toString();
-        print('✅ Chat ID (= User ID для приватного чата): $chatId');
-        return chatId;
-      }
-    } catch (e) {
-      print('❌ Ошибка webApp.chat: $e');
-    }
-    
-    // Способ 4: через URL параметры (для Reply Keyboard)
-    final currentUrl = html.window.location.href;
-    final uri = Uri.parse(currentUrl);
-    print('🌐 Текущий URL: $currentUrl');
-    print('🌐 URI параметры: ${uri.queryParameters}');
-    
-    final userIdFromUrl = uri.queryParameters['user_id'];
-    print('🌐 user_id из URL: "$userIdFromUrl"');
-    
-    if (userIdFromUrl != null && userIdFromUrl.isNotEmpty) {
-      print('✅ User ID через URL: $userIdFromUrl');
-      return userIdFromUrl;
-    }
-    
-    // Способ 5: через JS API напрямую
-    try {
-      final telegramObj = js.context['Telegram'];
-      if (telegramObj != null) {
-        final webAppObj = telegramObj['WebApp'];
-        if (webAppObj != null) {
-          final chatObj = webAppObj['chat'];
-          print('🔧 JS chat object: $chatObj');
-          
-          if (chatObj != null) {
-            final chatId = chatObj['id'];
-            final chatType = chatObj['type'];
-            print('🔧 Chat ID: $chatId, Type: $chatType');
-            
-            if (chatType == 'private' && chatId != null) {
-              print('✅ User ID через JS API: $chatId');
-              return chatId.toString();
-            }
-          }
-        }
-      }
-    } catch (e) {
-      print('❌ Ошибка JS API: $e');
-    }
-    
-    print('❌ User ID не найден ни одним из способов');
-    return null;
-  } catch (e) {
-    print('💥 Общая ошибка: $e');
+    final user = initDataUnsafe.user;
+    return user?.id?.toString();
+  } catch (_) {
     return null;
   }
 }
