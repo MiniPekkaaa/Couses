@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'course_select_screen.dart';
 import 'nocodb_service.dart';
 import 'dart:html' as html;
+import 'dart:js' as js;
 import 'telegram_webapp_js.dart';
 import 'dart:convert';
 
@@ -68,6 +69,31 @@ Future<String?> getTelegramUserId() async {
           return userId.toString();
         }
       }
+    }
+    
+    // Способ 3: через URL параметры (для случая с start_param)
+    final currentUrl = html.window.location.href;
+    final uri = Uri.parse(currentUrl);
+    final startParam = uri.queryParameters['start_param'];
+    
+    if (startParam == 'reply_keyboard') {
+      // Если это Reply Keyboard, попробуем альтернативные способы
+      try {
+        final webAppData = js.context['Telegram']['WebApp'];
+        final initDataStr = webAppData['initData'];
+        
+        if (initDataStr != null && initDataStr.toString().isNotEmpty) {
+          final params = Uri.parse('?${initDataStr.toString()}').queryParameters;
+          final userJson = params['user'];
+          if (userJson != null) {
+            final userData = jsonDecode(userJson);
+            final userId = userData['id'];
+            if (userId != null) {
+              return userId.toString();
+            }
+          }
+        }
+      } catch (_) {}
     }
     
     return null;
