@@ -51,38 +51,60 @@ class NotRegisteredScreen extends StatelessWidget {
 
 Future<String?> getTelegramUserId() async {
   try {
+    print('🔍 === ОТЛАДКА ПОЛУЧЕНИЯ USER ID ===');
+    
     // Способ 1: через initDataUnsafe (работает для Inline Keyboard)
-    final user = initDataUnsafe.user;
-    if (user?.id != null) {
-      return user!.id.toString();
+    try {
+      final user = initDataUnsafe.user;
+      print('📱 initDataUnsafe.user: $user');
+      if (user?.id != null) {
+        print('✅ User ID через initDataUnsafe: ${user!.id}');
+        return user.id.toString();
+      }
+    } catch (e) {
+      print('❌ Ошибка initDataUnsafe: $e');
     }
     
     // Способ 2: через webApp.initData (для Reply Keyboard)
-    final initData = webApp.initData;
-    if (initData.isNotEmpty) {
-      final params = Uri.parse('?$initData').queryParameters;
-      final userJson = params['user'];
-      if (userJson != null) {
-        final userData = jsonDecode(userJson);
-        final userId = userData['id'];
-        if (userId != null) {
-          return userId.toString();
+    try {
+      final initData = webApp.initData;
+      print('📱 webApp.initData: "$initData"');
+      if (initData.isNotEmpty) {
+        final params = Uri.parse('?$initData').queryParameters;
+        print('📱 Parsed params: $params');
+        final userJson = params['user'];
+        if (userJson != null) {
+          final userData = jsonDecode(userJson);
+          final userId = userData['id'];
+          if (userId != null) {
+            print('✅ User ID через webApp.initData: $userId');
+            return userId.toString();
+          }
         }
       }
+    } catch (e) {
+      print('❌ Ошибка webApp.initData: $e');
     }
     
     // Способ 3: через URL параметры (для Reply Keyboard)
     final currentUrl = html.window.location.href;
     final uri = Uri.parse(currentUrl);
+    print('🌐 Текущий URL: $currentUrl');
+    print('🌐 URI параметры: ${uri.queryParameters}');
     
     // Проверяем user_id в URL параметрах
     final userIdFromUrl = uri.queryParameters['user_id'];
+    print('🌐 user_id из URL: "$userIdFromUrl"');
+    
     if (userIdFromUrl != null && userIdFromUrl.isNotEmpty) {
+      print('✅ User ID через URL: $userIdFromUrl');
       return userIdFromUrl;
     }
     
+    print('❌ User ID не найден ни одним из способов');
     return null;
-  } catch (_) {
+  } catch (e) {
+    print('💥 Общая ошибка: $e');
     return null;
   }
 }
