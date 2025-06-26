@@ -11,6 +11,16 @@ class TelegramWebAppUser {
 @JS('initDataUnsafe')
 external TelegramInitData get initDataUnsafe;
 
+@JS('Telegram.WebApp')
+external TelegramWebApp get webApp;
+
+@JS()
+@anonymous
+class TelegramWebApp {
+  external TelegramInitData get initDataUnsafe;
+  external String get initData;
+}
+
 @JS()
 @anonymous
 class TelegramInitData {

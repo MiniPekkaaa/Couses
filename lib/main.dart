@@ -53,7 +53,7 @@ Future<String?> getTelegramUserId() async {
     // Способ 1: через initDataUnsafe (работает для Inline Keyboard)
     final user = initDataUnsafe.user;
     if (user?.id != null) {
-      return user.id.toString();
+      return user!.id.toString();
     }
     
     // Способ 2: через webApp.initData (для Reply Keyboard)
