@@ -4,6 +4,7 @@ import 'nocodb_service.dart';
 import 'dart:html' as html;
 import 'telegram_webapp_js.dart';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,11 +49,43 @@ class NotRegisteredScreen extends StatelessWidget {
   }
 }
 
+void logMessage(String message, {String name = 'App'}) {
+  developer.log(message, name: name);
+  print('[$name] $message'); // Дублируем в print для надежности
+}
+
 Future<String?> getTelegramUserId() async {
   try {
+    // Сначала пробуем получить из initDataUnsafe
     final user = initDataUnsafe.user;
-    return user?.id?.toString();
-  } catch (_) {
+    if (user?.id != null) {
+      logMessage('Got user ID from initDataUnsafe: ${user!.id}');
+      return user!.id!.toString();
+    }
+
+    logMessage('User not found in initDataUnsafe, trying URL params');
+    // Если не получилось, пробуем из URL параметров
+    final uri = Uri.parse(html.window.location.href);
+    final userIdFromUrl = uri.queryParameters['user_id'];
+    if (userIdFromUrl != null && userIdFromUrl.isNotEmpty) {
+      logMessage('Got user ID from URL: $userIdFromUrl');
+      return userIdFromUrl;
+    }
+    
+    logMessage('Trying start_param');
+    final startParam = initDataUnsafe.start_param;
+    logMessage('start_param value: $startParam');
+    
+    if (startParam != null && startParam.contains('user_id=')) {
+      final match = RegExp(r'user_id=(\d+)').firstMatch(startParam);
+      final userId = match?.group(1); 
+      logMessage('Extracted user ID from start_param: $userId');
+      return userId;
+    }
+    
+    return null;
+  } catch (e) {
+    print('Error getting user ID: $e');
     return null;
   }
 }
