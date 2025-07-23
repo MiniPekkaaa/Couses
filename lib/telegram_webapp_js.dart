@@ -15,4 +15,5 @@ external TelegramInitData get initDataUnsafe;
 @anonymous
 class TelegramInitData {
   external TelegramWebAppUser? get user;
+  external String? get start_param;
 } 
